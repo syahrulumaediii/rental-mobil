@@ -40,6 +40,7 @@
                         <option value="">-- Pilih Role --</option>
                         <option value="admin" {{ old('role', $user->role ?? '') === 'admin' ? 'selected' : '' }}>Admin</option>
                         <option value="kasir" {{ old('role', $user->role ?? '') === 'kasir' ? 'selected' : '' }}>Kasir</option>
+                        <option value="pelanggan" {{ old('role', $user->role ?? '') === 'pelanggan' ? 'selected' : '' }}>Pelanggan</option>
                     </select>
                     @error('role')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>

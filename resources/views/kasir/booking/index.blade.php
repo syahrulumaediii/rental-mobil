@@ -19,7 +19,8 @@
             <label class="form-label">Status</label>
             <select name="status" class="form-input w-40">
                 <option value="">Semua</option>
-                @foreach(['pending','disetujui','ditolak','berlangsung','selesai','dibatalkan'] as $s)
+                {{-- DI SINI: Sudah diubah dari 'berlangsung' menjadi 'aktif' --}}
+                @foreach(['pending','disetujui','ditolak','aktif','selesai','dibatalkan'] as $s)
                 <option value="{{ $s }}" {{ request('status')===$s?'selected':'' }}>{{ ucfirst($s) }}</option>
                 @endforeach
             </select>
@@ -41,7 +42,7 @@
                 <th>Periode</th>
                 <th>Estimasi Biaya</th>
                 <th>Status</th>
-                <th></th>
+                <th>Aksi</th>
             </tr>
         </thead>
         <tbody>
@@ -62,22 +63,35 @@
                 </td>
                 <td class="font-semibold text-slate-700">Rp {{ number_format($b->estimasi_biaya, 0, ',', '.') }}</td>
                 <td>
-                    @php $sc = ['pending'=>'badge-yellow','disetujui'=>'badge-blue','ditolak'=>'badge-red','berlangsung'=>'badge-green','selesai'=>'badge-gray','dibatalkan'=>'badge-red']; @endphp
+                    {{-- DI SINI: Mapping badge warna sudah disesuaikan ke status 'aktif' --}}
+                    @php $sc = ['pending'=>'badge-yellow','disetujui'=>'badge-blue','ditolak'=>'badge-red','aktif'=>'badge-green','selesai'=>'badge-gray','dibatalkan'=>'badge-red']; @endphp
                     <span class="badge {{ $sc[$b->status] ?? 'badge-gray' }}">{{ ucfirst($b->status) }}</span>
                 </td>
                 <td>
                     <div class="flex items-center gap-1.5 justify-end">
-                        <a href="{{ route('kasir.booking.show', $b) }}" class="p-1.5 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors"><i data-lucide="eye" class="w-4 h-4"></i></a>
+                        <a href="{{ route('kasir.booking.show', $b) }}" class="p-1.5 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors" title="Lihat Detail">
+                            <i data-lucide="eye" class="w-4 h-4"></i>
+                        </a>
+                        
                         @if($b->status === 'pending')
-                        <form method="POST" action="{{ route('kasir.booking.approve', $b) }}">
+                        <form method="POST" action="{{ route('kasir.booking.disetujui', $b) }}">
                             @csrf @method('PATCH')
-                            <button class="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Setujui">
+                            <button class="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Setujui Booking">
                                 <i data-lucide="check" class="w-4 h-4"></i>
                             </button>
                         </form>
-                        <button onclick="openRejectModal({{ $b->id }})" class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Tolak">
+                        <button onclick="openRejectModal({{ $b->id }})" class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Tolak Booking">
                             <i data-lucide="x" class="w-4 h-4"></i>
                         </button>
+
+                        @elseif($b->status === 'disetujui')
+                        {{-- DI SINI: Tombol dialihkan ke route serah terima kasir --}}
+                        <a href="{{ route('kasir.transaksi.serah-terima', $b->id) }}" 
+                           class="px-2.5 py-1 text-xs font-bold bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg border border-blue-200 transition-all flex items-center gap-1" 
+                           title="Proses Serah Terima Mobil">
+                            <i data-lucide="key" class="w-3.5 h-3.5"></i>
+                            Serah Terima
+                        </a>
                         @endif
                     </div>
                 </td>

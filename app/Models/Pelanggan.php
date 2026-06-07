@@ -20,6 +20,7 @@ class Pelanggan extends Model
         'kota',
         'pekerjaan',
         'status_verifikasi',
+        'foto_profil',
     ];
 
     protected function casts(): array

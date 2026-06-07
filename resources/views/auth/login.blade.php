@@ -3,9 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login — RentKar</title>
+    <title>Login — Rull Car</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/login.css') }}">
+    @vite([
+        'resources/css/auth/login.css',
+        'resources/js/auth/login.js'
+    ])
 </head>
 <body>
 
@@ -99,7 +102,7 @@
     <rect x="480" y="310" width="120" height="3" fill="#0ea5e9" opacity=".22"/>
     <rect x="480" y="400" width="120" height="3" fill="#0ea5e9" opacity=".18"/>
     <g filter="url(#lneon)">
-        <text x="496" y="490" fill="#0ea5e9" font-size="13" font-family="monospace" font-weight="700" opacity=".95">RENTKAR</text>
+        <text x="496" y="490" fill="#0ea5e9" font-size="13" font-family="monospace" font-weight="700" opacity=".95">RULL CAR</text>
     </g>
     <line x1="496" y1="494" x2="568" y2="494" stroke="#0ea5e9" stroke-width="1.5" opacity=".7"/>
     <g fill="#bae6fd" opacity=".5">
@@ -203,14 +206,14 @@
             <circle cx="12" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
         </svg>
     </div>
-    <span class="nav-logo-text">Rent<span>Kar</span></span>
+    <span class="nav-logo-text">Rull<span>Car</span></span>
 </nav>
 
 <!-- ════════════ MAIN ════════════ -->
 <main class="page-center">
     <div class="card">
         <h1 class="card-title">Selamat Datang</h1>
-        <p class="card-sub">Masuk ke akun RentKar Anda</p>
+        <p class="card-sub">Masuk ke akun Rull Car Anda</p>
 
         <!-- ERROR ALERT — Laravel: @if($errors->any() || session('error')) -->
         <div class="alert alert-error" id="alertError" style="display:none">
@@ -306,8 +309,6 @@
     </div>
 </main>
 
-@push('scripts')
-    <script src="{{ asset('js/login.js') }}"></script>
-@endpush
+
 </body>
 </html>

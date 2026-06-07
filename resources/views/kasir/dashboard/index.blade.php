@@ -29,11 +29,11 @@
     <div class="card p-5">
         <div class="flex items-start justify-between mb-3">
             <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide leading-tight">{{ $c['label'] }}</p>
-            <div class="w-9 h-9 {{ $cl['bg'] }} rounded-xl flex items-center justify-center shrink-0">
+            <div class="w-full {{ $cl['bg'] }} rounded-xl flex items-center justify-center sm:w-auto text-center mt-2 sm:mt-0">
                 <i data-lucide="{{ $c['icon'] }}" class="w-4 h-4 {{ $cl['ic'] }}"></i>
             </div>
         </div>
-        <p class="text-2xl font-extrabold {{ $cl['v'] }}">{{ $c['value'] }}</p>
+        <p class="text-xl sm:text-2xl font-extrabold {{ $cl['v'] }}">{{ $c['value'] }}</p>
     </div>
     @endforeach
 </div>
@@ -47,7 +47,7 @@
         </div>
         <div class="divide-y divide-slate-50">
             @forelse($booking_siap as $b)
-            <div class="px-5 py-4 flex items-center gap-3">
+            <div class="px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
                 <div class="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center shrink-0">
                     <i data-lucide="car" class="w-5 h-5 text-primary-600"></i>
                 </div>
@@ -56,7 +56,7 @@
                     <p class="text-xs text-slate-400">{{ $b->kendaraan->nama }} · {{ $b->kode_booking }}</p>
                     <p class="text-xs text-slate-400">Mulai: {{ $b->tanggal_mulai?->format('d M Y') }}</p>
                 </div>
-                <a href="{{ route('kasir.transaksi.form-serah-terima', $b) }}" class="btn-primary text-xs px-3 py-1.5 shrink-0">
+                <a href="{{ route('kasir.transaksi.serah-terima', $b) }}" class="btn-primary text-xs px-3 py-1.5 shrink-0">
                     Serah Terima
                 </a>
             </div>

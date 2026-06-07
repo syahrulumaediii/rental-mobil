@@ -27,6 +27,7 @@
                 <option value="">Semua Role</option>
                 <option value="admin"  {{ request('role')==='admin'  ? 'selected':'' }}>Admin</option>
                 <option value="kasir"  {{ request('role')==='kasir'  ? 'selected':'' }}>Kasir</option>
+                <option value="pelanggan"  {{ request('role')==='pelanggan'  ? 'selected':'' }}>Pelanggan</option>
             </select>
         </div>
         <button type="submit" class="btn-primary">Filter</button>

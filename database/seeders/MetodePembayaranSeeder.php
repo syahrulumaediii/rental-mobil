@@ -21,7 +21,7 @@ class MetodePembayaranSeeder extends Seeder
         ]);
 
         MetodePembayaran::create([
-            'nama' => 'Transfer Bank BCA',
+            'nama' => 'Transfer Bank',
             'tipe' => 'transfer',
             'is_active' => true,
         ]);

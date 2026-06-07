@@ -3,6 +3,7 @@
 @section('title', 'Buat Booking')
 @section('page-title', 'Buat Booking')
 @section('breadcrumb', 'Katalog / Buat Booking')
+@vite('resources/js/pelanggan/booking/create.js')
 
 @section('sidebar-nav')
     @include('components.sidebar-pelanggan')
@@ -89,23 +90,5 @@
 @endsection
 
 @push('scripts')
-<script>
-function bookingForm() {
-    return {
-        mulai: '{{ old('tanggal_mulai', '') }}',
-        selesai: '{{ old('tanggal_selesai', '') }}',
-        durasi: 0,
-        estimasi: 0,
-        tarif: {{ $kendaraan->tarif_harian }},
-        hitungEstimasi() {
-            if (this.mulai && this.selesai) {
-                const d1 = new Date(this.mulai);
-                const d2 = new Date(this.selesai);
-                this.durasi = Math.max(0, Math.round((d2 - d1) / (1000*60*60*24)));
-                this.estimasi = this.durasi * this.tarif;
-            }
-        }
-    }
-}
-</script>
+
 @endpush

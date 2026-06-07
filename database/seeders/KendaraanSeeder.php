@@ -34,5 +34,90 @@ class KendaraanSeeder extends Seeder
             'foto'          => null,
             'deskripsi'     => 'Mobil keluarga hemat BBM',
         ]);
+
+        Kendaraan::create([
+            'kategori_id'   => $kategori->id,
+            'nama'          => 'Toyota Rush 2023',
+            'merk'          => 'Toyota',
+            'model'         => 'Rush',
+            'tahun'         => 2023,
+            'plat_nomor'    => 'B 2345 DEF',
+            'warna'         => 'Hitam',
+            'kapasitas'     => 7,
+            'transmisi'     => 'manual',
+            'bahan_bakar'   => 'bensin',
+            'tarif_harian'  => 400000,
+            'status'        => 'tersedia',
+            'foto'          => null,
+            'deskripsi'     => 'SUV keluarga nyaman untuk perjalanan jauh',
+        ]);
+
+        Kendaraan::create([
+            'kategori_id'   => $kategori->id,
+            'nama'          => 'Honda Brio 2022',
+            'merk'          => 'Honda',
+            'model'         => 'Brio',
+            'tahun'         => 2022,
+            'plat_nomor'    => 'B 3456 GHI',
+            'warna'         => 'Merah',
+            'kapasitas'     => 5,
+            'transmisi'     => 'matic',
+            'bahan_bakar'   => 'bensin',
+            'tarif_harian'  => 300000,
+            'status'        => 'tersedia',
+            'foto'          => null,
+            'deskripsi'     => 'City car irit dan lincah',
+        ]);
+
+        Kendaraan::create([
+            'kategori_id'   => $kategori->id,
+            'nama'          => 'Mitsubishi Xpander 2024',
+            'merk'          => 'Mitsubishi',
+            'model'         => 'Xpander',
+            'tahun'         => 2024,
+            'plat_nomor'    => 'B 4567 JKL',
+            'warna'         => 'Silver',
+            'kapasitas'     => 7,
+            'transmisi'     => 'matic',
+            'bahan_bakar'   => 'bensin',
+            'tarif_harian'  => 450000,
+            'status'        => 'tersedia',
+            'foto'          => null,
+            'deskripsi'     => 'MPV modern dengan kabin luas',
+        ]);
+
+        Kendaraan::create([
+            'kategori_id'   => $kategori->id,
+            'nama'          => 'Daihatsu Sigra 2021',
+            'merk'          => 'Daihatsu',
+            'model'         => 'Sigra',
+            'tahun'         => 2021,
+            'plat_nomor'    => 'B 5678 MNO',
+            'warna'         => 'Putih',
+            'kapasitas'     => 7,
+            'transmisi'     => 'manual',
+            'bahan_bakar'   => 'bensin',
+            'tarif_harian'  => 275000,
+            'status'        => 'tersedia',
+            'foto'          => null,
+            'deskripsi'     => 'Mobil keluarga ekonomis',
+        ]);
+
+        Kendaraan::create([
+            'kategori_id'   => $kategori->id,
+            'nama'          => 'Suzuki Ertiga 2023',
+            'merk'          => 'Suzuki',
+            'model'         => 'Ertiga',
+            'tahun'         => 2023,
+            'plat_nomor'    => 'B 6789 PQR',
+            'warna'         => 'Abu-abu',
+            'kapasitas'     => 7,
+            'transmisi'     => 'matic',
+            'bahan_bakar'   => 'bensin',
+            'tarif_harian'  => 375000,
+            'status'        => 'tersedia',
+            'foto'          => null,
+            'deskripsi'     => 'MPV nyaman dan hemat bahan bakar',
+        ]);
     }
 }

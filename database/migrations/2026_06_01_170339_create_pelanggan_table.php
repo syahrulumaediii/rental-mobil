@@ -31,6 +31,7 @@ return new class extends Migration
                 'rejected',
             ])->default('pending');
             $table->index('status_verifikasi');
+            $table->string('foto_profil')->nullable();
             $table->timestamps();
         });
     }

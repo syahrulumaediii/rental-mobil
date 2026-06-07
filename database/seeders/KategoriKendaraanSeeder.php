@@ -18,5 +18,25 @@ class KategoriKendaraanSeeder extends Seeder
             'nama' => 'Mobil',
             'deskripsi' => 'Kategori kendaraan mobil penumpang',
         ]);
+
+        KategoriKendaraan::create([
+            'nama' => 'SUV',
+            'deskripsi' => 'Mobil sport utility vehicle',
+        ]);
+
+        KategoriKendaraan::create([
+            'nama' => 'City Car',
+            'deskripsi' => 'Mobil kecil untuk penggunaan perkotaan',
+        ]);
+
+        KategoriKendaraan::create([
+            'nama' => 'Sedan',
+            'deskripsi' => 'Mobil sedan untuk kenyamanan berkendara',
+        ]);
+
+        KategoriKendaraan::create([
+            'nama' => 'Premium',
+            'deskripsi' => 'Mobil premium dan eksekutif',
+        ]);
     }
 }

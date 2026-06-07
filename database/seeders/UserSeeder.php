@@ -33,7 +33,7 @@ class UserSeeder extends Seeder
         ]);
 
         User::create([
-            'name' => 'Pelanggan Demo',
+            'name' => 'SYAHRUL UMAEDI',
             'email' => 'pelanggan@gmail.com',
             'password' => Hash::make('pelanggan123'),
             'role' => 'pelanggan',

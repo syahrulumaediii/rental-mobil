@@ -19,7 +19,7 @@ return new class extends Migration
                 ->cascadeOnUpdate();
             $table->enum('jenis_denda', ['keterlambatan', 'kerusakan', 'kehilangan']);
             $table->text('keterangan')->nullable();
-            $table->unsignedInteger('jumlah_jam_telat')->nullable()->default(0);
+            $table->unsignedInteger('jumlah_hari_telat')->nullable()->default(0);
             $table->decimal('tarif_denda', 12, 2)->default(0.00);
             $table->decimal('total_denda', 12, 2)->default(0.00);
             $table->timestamps();

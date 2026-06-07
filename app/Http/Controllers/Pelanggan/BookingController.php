@@ -97,20 +97,46 @@ class BookingController extends Controller
         $durasi  = $mulai->diffInDays($selesai);
         $estimasi = $durasi * $kendaraan->tarif_harian;
 
-        Booking::create([
-            'kode_booking'    => 'BKG-' . strtoupper(Str::random(8)),
-            'pelanggan_id'    => $pelanggan->id,
-            'kendaraan_id'    => $request->kendaraan_id,
-            'tanggal_mulai'   => $request->tanggal_mulai,
-            'tanggal_selesai' => $request->tanggal_selesai,
-            'durasi_hari'     => $durasi,
-            'estimasi_biaya'  => $estimasi,
-            'catatan'         => $request->catatan,
-            'status'          => 'pending',
-        ]);
+        // Menggunakan database transaction untuk keamanan data terintegrasi
+        \Illuminate\Support\Facades\DB::beginTransaction();
+        try {
+            // 1. Buat data booking
+            $booking = Booking::create([
+                'kode_booking'    => 'BKG-' . strtoupper(\Illuminate\Support\Str::random(8)),
+                'pelanggan_id'    => $pelanggan->id,
+                'kendaraan_id'    => $request->kendaraan_id,
+                'tanggal_mulai'   => $request->tanggal_mulai,
+                'tanggal_selesai' => $request->tanggal_selesai,
+                'durasi_hari'     => $durasi,
+                'estimasi_biaya'  => $estimasi,
+                'catatan'         => $request->catatan,
+                'status'          => 'pending',
+            ]);
 
-        return redirect()->route('pelanggan.booking.index')
-            ->with('success', 'Booking berhasil dibuat! Menunggu persetujuan admin.');
+            // 2. Kirim Notifikasi Sistem otomatis ke user tersebut
+            // Format menggunakan [BOOKING] agar dibaca dinamis oleh view template sebelumnya
+            $judulNotif = '[BOOKING] Pengajuan Sewa Kendaraan ' . $booking->kode_booking;
+            $pesanNotif = "Halo " . Auth::user()->name . ", pengajuan booking untuk mobil " . $kendaraan->nama . " (" . $durasi . " hari) dengan estimasi biaya Rp " . number_format($estimasi, 0, ',', '.') . " berhasil dibuat. Silakan tunggu verifikasi tim admin.";
+
+            \Illuminate\Support\Facades\DB::table('notifikasi')->insert([
+                'user_id'    => Auth::id(), // ID dari tabel users (bukan pelanggan_id)
+                'judul'      => $judulNotif,
+                'pesan'      => $pesanNotif,
+                'url'        => route('pelanggan.booking.show', $booking->id), // Klik notif langsung diarahkan ke detail booking ini
+                'read_at'    => null,
+                'created_at' => now(), // Mengikuti jam Asia/Jakarta
+                'updated_at' => now(),
+            ]);
+
+            \Illuminate\Support\Facades\DB::commit();
+
+            return redirect()->route('pelanggan.booking.index')
+                ->with('success', 'Booking berhasil dibuat! Menunggu persetujuan admin.');
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return back()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
+        }
     }
 
     public function show(Booking $booking)

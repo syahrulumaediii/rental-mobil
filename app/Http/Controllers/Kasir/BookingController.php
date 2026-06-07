@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Kasir;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
+use App\Models\Deposit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -35,7 +36,7 @@ class BookingController extends Controller
         return view('kasir.booking.show', compact('booking'));
     }
 
-    public function approve(Request $request, Booking $booking)
+    public function disetujui(Request $request, Booking $booking)
     {
         if ($booking->status !== 'pending') {
             return back()->with('error', 'Booking ini sudah diproses.');
@@ -46,10 +47,11 @@ class BookingController extends Controller
         }
 
         $booking->update([
-            'status'           => 'disetujui',
-            'dikonfirmasi_oleh' => Auth::id(),
-            'dikonfirmasi_at'  => now(),
+            'status' => 'disetujui',
+            'disetujui_oleh' => Auth::id(),
+            'disetujui_at' => now(),
         ]);
+
 
         // Ubah status kendaraan menjadi tidak tersedia
         $booking->kendaraan->update(['status' => 'disewa']);
@@ -57,7 +59,7 @@ class BookingController extends Controller
         return back()->with('success', 'Booking berhasil disetujui.');
     }
 
-    public function reject(Request $request, Booking $booking)
+    public function ditolak(Request $request, Booking $booking)
     {
         $request->validate([
             'alasan_penolakan' => 'required|string|max:500',

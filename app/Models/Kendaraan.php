@@ -36,6 +36,12 @@ class Kendaraan extends Model
         ];
     }
 
+    public function transaksiSewa()
+    {
+        // Parameter: (Model_Tujuan, Model_Perantara, Foreign_Key_Perantara_di_Tujuan, Foreign_Key_Asal_di_Perantara)
+        return $this->hasManyThrough(TransaksiSewa::class, Booking::class, 'kendaraan_id', 'booking_id');
+    }
+
     // ==================== RELASI ====================
 
     public function kategori(): BelongsTo

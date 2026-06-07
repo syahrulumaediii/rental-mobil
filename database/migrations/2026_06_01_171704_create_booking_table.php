@@ -41,7 +41,7 @@ return new class extends Migration
                 ->constrained('users')
                 ->nullOnDelete()
                 ->cascadeOnUpdate();
-            $table->timestamp('disetujui_oleh')->nullable();
+            $table->timestamp('disetujui_at')->nullable();
             $table->timestamps();
 
             $table->index('pelanggan_id', 'idx_booking_pelanggan');
