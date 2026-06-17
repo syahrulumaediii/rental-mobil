@@ -134,7 +134,7 @@
 </div>
 
 {{-- Reject Modal (Centered & Responsive) --}}
-<div id="rejectModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 transition-all animate-fade-in">
+<div id="rejectModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-xs z-50 items-center justify-center p-4 transition-all animate-fade-in">
     <div class="bg-white rounded-2xl w-full max-w-md p-5 sm:p-6 shadow-xl border border-slate-100">
         <h3 class="font-bold text-base sm:text-lg text-slate-800 mb-1">Tolak Booking</h3>
         <p class="text-xs sm:text-sm text-slate-500 mb-4">Berikan alasan penolakan booking ini dengan jelas.</p>
@@ -156,7 +156,7 @@
 @push('scripts')
 <script>
 function openRejectModal(id) {
-    document.getElementById('rejectForm').action = `/admin/booking/${id}/reject`;
+    document.getElementById('rejectForm').action = `/admin/booking/${id}/ditolak`;
     const modal = document.getElementById('rejectModal');
     modal.classList.remove('hidden');
     modal.classList.add('flex');

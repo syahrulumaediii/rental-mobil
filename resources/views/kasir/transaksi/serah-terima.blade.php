@@ -9,6 +9,10 @@
 @endsection
 
 @section('content')
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
 <div class="max-w-3xl mx-auto space-y-5 px-2 sm:px-0">
 
     {{-- Info Booking --}}
@@ -25,15 +29,15 @@
                 ['Kendaraan',     $booking->kendaraan->nama.' ('.$booking->kendaraan->plat_nomor.')'],
                 ['Kategori',      $booking->kendaraan->kategori->nama ?? '-'],
                 ['Transmisi',      ucfirst($booking->kendaraan->transmisi)],
-                ['Tanggal Mulai', $booking->tanggal_mulai?->format('d M Y')],
-                ['Tanggal Selesai',$booking->tanggal_selesai?->format('d M Y')],
+                ['Tanggal Mulai', $booking->tanggal_mulai?->format('d M Y H:i')],
+                ['Tanggal Selesai', $booking->tanggal_selesai?->format('d M Y H:i')],
                 ['Durasi',        $booking->durasi_hari.' hari'],
                 ['Estimasi Biaya','Rp '.number_format($booking->estimasi_biaya,0,',','.')],
             ] as [$lbl,$val])
             {{-- Perubahan: flex-col di HP (atas-bawah), sm:flex-row di Tablet/PC (kiri-kanan) --}}
             <div class="flex flex-col sm:flex-row sm:justify-between py-2 border-b border-slate-50 last:border-0 sm:last:border-b">
                 <span class="text-xs text-slate-400 uppercase tracking-wider sm:normal-case sm:text-sm">{{ $lbl }}</span>
-                <span class="font-medium text-slate-700 sm:text-right mt-0.5 sm:mt-0 break-words">{{ $val }}</span>
+                <span class="font-medium text-slate-700 sm:text-right mt-0.5 sm:mt-0 wrap-break-word">{{ $val }}</span>
             </div>
             @endforeach
         </div>
@@ -51,7 +55,13 @@
 
                 <div>
                     <label class="form-label">Tanggal Pengambilan Aktual</label>
-                    <input type="date" name="tanggal_ambil_aktual" value="{{ old('tanggal_ambil_aktual', date('Y-m-d')) }}" class="form-input w-full" required>
+                    <input type="text" 
+                        id="tanggal_ambil_aktual"
+                        name="tanggal_ambil_aktual" 
+                        value="{{ old('tanggal_ambil_aktual', now()->timezone('Asia/Jakarta')->format('d-m-Y H:i')) }}" 
+                        class="form-input w-full bg-white" 
+                        placeholder="Pilih Tanggal & Waktu"
+                        required>
                 </div>
 
                 <div>
@@ -174,6 +184,15 @@
         } else {
             console.error('Kritikal: Elemen input_deposit atau jumlah_bayar tidak ditemukan di halaman.');
         }
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        flatpickr("#tanggal_ambil_aktual", {
+            enableTime: true,
+            time_24hr: true,
+            dateFormat: "d-m-Y H:i", // <-- Format ini yang akan dikirim ke Controller Anda
+            allowInput: true
+        });
     });
 </script>
 @endsection

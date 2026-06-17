@@ -12,7 +12,7 @@ class BookingController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Booking::with(['pelanggan.user', 'kendaraan', 'konfirmator']);
+        $query = Booking::with(['pelanggan.user', 'kendaraan', 'disetujuiOleh', 'dibuatOleh']);
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -30,7 +30,7 @@ class BookingController extends Controller
 
     public function show(Booking $booking)
     {
-        $booking->load(['pelanggan.user', 'pelanggan.dokumen', 'kendaraan.kategori', 'konfirmator', 'transaksiSewa']);
+        $booking->load(['pelanggan.user', 'pelanggan.dokumen', 'kendaraan.kategori', 'disetujuiOleh', 'dibuatOleh', 'transaksiSewa']);
 
         return view('admin.booking.show', compact('booking'));
     }
@@ -90,7 +90,7 @@ class BookingController extends Controller
         }
     }
 
-    public function reject(Request $request, Booking $booking)
+    public function ditolak(Request $request, Booking $booking)
     {
         $request->validate([
             'alasan_penolakan' => 'required|string|max:500',
@@ -106,8 +106,8 @@ class BookingController extends Controller
             $booking->update([
                 'status'            => 'ditolak',
                 'alasan_penolakan'  => $request->alasan_penolakan,
-                'dikonfirmasi_oleh' => Auth::id(),
-                'dikonfirmasi_at'   => now(),
+                'disetujui_oleh' => Auth::id(),
+                'disetujui_at'   => now(),
             ]);
 
             // 2. Ambil data User Pelanggan

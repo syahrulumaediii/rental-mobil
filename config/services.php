@@ -14,6 +14,11 @@ return [
     |
     */
 
+    'whatsapp' => [
+        'token' => env('WHATSAPP_API_TOKEN'),
+        'url'   => env('WHATSAPP_API_URL'),
+    ],
+
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
     ],

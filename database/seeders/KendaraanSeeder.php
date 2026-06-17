@@ -14,9 +14,13 @@ class KendaraanSeeder extends Seeder
      */
     public function run(): void
     {
-        //
-
+        // Mengambil kategori pertama yang aktif
         $kategori = KategoriKendaraan::first();
+
+        // Jika belum ada kategori sama sekali di database, buat cadangan agar seeder tidak error
+        if (!$kategori) {
+            $kategori = KategoriKendaraan::create(['nama' => 'Mobil']);
+        }
 
         Kendaraan::create([
             'kategori_id'   => $kategori->id,
@@ -30,7 +34,8 @@ class KendaraanSeeder extends Seeder
             'transmisi'     => 'manual',
             'bahan_bakar'   => 'bensin',
             'tarif_harian'  => 350000,
-            'status'        => 'tersedia',
+            'denda_per_jam' => 35000, // 🌟 Tambahan kolom denda
+            'status'        => 'aktif',
             'foto'          => null,
             'deskripsi'     => 'Mobil keluarga hemat BBM',
         ]);
@@ -47,7 +52,8 @@ class KendaraanSeeder extends Seeder
             'transmisi'     => 'manual',
             'bahan_bakar'   => 'bensin',
             'tarif_harian'  => 400000,
-            'status'        => 'tersedia',
+            'denda_per_jam' => 40000, // 🌟 Tambahan kolom denda
+            'status'        => 'aktif',
             'foto'          => null,
             'deskripsi'     => 'SUV keluarga nyaman untuk perjalanan jauh',
         ]);
@@ -64,7 +70,8 @@ class KendaraanSeeder extends Seeder
             'transmisi'     => 'matic',
             'bahan_bakar'   => 'bensin',
             'tarif_harian'  => 300000,
-            'status'        => 'tersedia',
+            'denda_per_jam' => 30000, // 🌟 Tambahan kolom denda
+            'status'        => 'aktif',
             'foto'          => null,
             'deskripsi'     => 'City car irit dan lincah',
         ]);
@@ -81,7 +88,8 @@ class KendaraanSeeder extends Seeder
             'transmisi'     => 'matic',
             'bahan_bakar'   => 'bensin',
             'tarif_harian'  => 450000,
-            'status'        => 'tersedia',
+            'denda_per_jam' => 45000, // 🌟 Tambahan kolom denda
+            'status'        => 'aktif',
             'foto'          => null,
             'deskripsi'     => 'MPV modern dengan kabin luas',
         ]);
@@ -98,7 +106,8 @@ class KendaraanSeeder extends Seeder
             'transmisi'     => 'manual',
             'bahan_bakar'   => 'bensin',
             'tarif_harian'  => 275000,
-            'status'        => 'tersedia',
+            'denda_per_jam' => 25000, // 🌟 Tambahan kolom denda
+            'status'        => 'aktif',
             'foto'          => null,
             'deskripsi'     => 'Mobil keluarga ekonomis',
         ]);
@@ -115,7 +124,8 @@ class KendaraanSeeder extends Seeder
             'transmisi'     => 'matic',
             'bahan_bakar'   => 'bensin',
             'tarif_harian'  => 375000,
-            'status'        => 'tersedia',
+            'denda_per_jam' => 35000, // 🌟 Tambahan kolom denda
+            'status'        => 'aktif',
             'foto'          => null,
             'deskripsi'     => 'MPV nyaman dan hemat bahan bakar',
         ]);

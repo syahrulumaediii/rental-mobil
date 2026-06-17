@@ -26,8 +26,8 @@ class KendaraanController extends Controller
         if ($request->filled('search')) {
             $query->where(function ($q) use ($request) {
                 $q->where('nama', 'like', "%{$request->search}%")
-                  ->orWhere('plat_nomor', 'like', "%{$request->search}%")
-                  ->orWhere('merk', 'like', "%{$request->search}%");
+                    ->orWhere('plat_nomor', 'like', "%{$request->search}%")
+                    ->orWhere('merk', 'like', "%{$request->search}%");
             });
         }
 
@@ -58,7 +58,7 @@ class KendaraanController extends Controller
             'transmisi'    => ['required', Rule::in(['manual', 'otomatis'])],
             'bahan_bakar'  => ['required', Rule::in(['bensin', 'solar', 'listrik', 'hybrid'])],
             'tarif_harian' => 'required|numeric|min:0',
-            'status'       => ['required', Rule::in(['tersedia', 'disewa', 'perawatan'])],
+            'status'       => ['required', Rule::in(['aktif','non-aktif', 'disewa', 'servis'])],
             'foto'         => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'deskripsi'    => 'nullable|string',
         ]);
@@ -77,7 +77,7 @@ class KendaraanController extends Controller
 
     public function show(Kendaraan $kendaraan)
     {
-        $kendaraan->load(['kategori', 'booking.pelanggan.user']);
+        $kendaraan->load(['kategori', 'bookings.pelanggan.user']);
 
         return view('admin.kendaraan.show', compact('kendaraan'));
     }
@@ -103,7 +103,7 @@ class KendaraanController extends Controller
             'transmisi'    => ['required', Rule::in(['manual', 'otomatis'])],
             'bahan_bakar'  => ['required', Rule::in(['bensin', 'solar', 'listrik', 'hybrid'])],
             'tarif_harian' => 'required|numeric|min:0',
-            'status'       => ['required', Rule::in(['tersedia', 'disewa', 'perawatan'])],
+            'status'       => ['required', Rule::in(['aktif', 'non-aktif','disewa', 'servis'])],
             'foto'         => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'deskripsi'    => 'nullable|string',
         ]);

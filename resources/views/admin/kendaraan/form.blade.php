@@ -55,6 +55,7 @@
                 <div>
                     <label class="form-label">Plat Nomor</label>
                     <input type="text" name="plat_nomor" value="{{ old('plat_nomor', $kendaraan->plat_nomor ?? '') }}" class="form-input font-mono" required placeholder="B 1234 ABC">
+                    @error('plat_nomor')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
@@ -90,15 +91,24 @@
                 <div>
                     <label class="form-label">Tarif Harian (Rp)</label>
                     <input type="number" name="tarif_harian" value="{{ old('tarif_harian', $kendaraan->tarif_harian ?? '') }}" class="form-input" required min="0" step="1000" placeholder="300000">
+                    @error('tarif_harian')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
 
+                {{-- 🌟 BARU: Input Nilai Denda Keterlambatan Per Jam --}}
                 <div>
+                    <label class="form-label">Denda Terlambat / Jam (Rp)</label>
+                    <input type="number" name="denda_per_jam" value="{{ old('denda_per_jam', $kendaraan->denda_per_jam ?? '') }}" class="form-input" required min="0" step="1000" placeholder="25000">
+                    @error('denda_per_jam')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                </div>
+
+                <div class="col-span-2">
                     <label class="form-label">Status</label>
                     <select name="status" class="form-input" required>
-                        @foreach(['tersedia'=>'Tersedia','disewa'=>'Disewa','perawatan'=>'Perawatan'] as $val=>$lbl)
+                        @foreach(['tersedia'=>'Tersedia','disewa'=>'Disewa','perawatan'=>'Perawatan','rusak'=>'Rusak'] as $val=>$lbl)
                         <option value="{{ $val }}" {{ old('status', $kendaraan->status ?? 'tersedia') === $val ? 'selected' : '' }}>{{ $lbl }}</option>
                         @endforeach
                     </select>
+                    @error('status')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
 
                 <div class="col-span-2">

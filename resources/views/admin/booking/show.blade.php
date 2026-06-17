@@ -226,7 +226,7 @@
 @push('scripts')
 <script>
 function openRejectModal(id) {
-    document.getElementById('rejectForm').action = `/admin/booking/${id}/reject`;
+    document.getElementById('rejectForm').action = `/admin/booking/${id}/ditolak`;
     const modal = document.getElementById('rejectModal');
     modal.classList.remove('hidden');
     modal.classList.add('flex');

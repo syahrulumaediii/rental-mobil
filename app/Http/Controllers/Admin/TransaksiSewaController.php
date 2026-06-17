@@ -162,14 +162,14 @@ class TransaksiSewaController extends Controller
             'km_odometer_akhir'      => 'required|integer|min:0',
             'foto_kondisi_akhir'     => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'catatan_kondisi_akhir'  => 'nullable|string',
-            
+
             'dendas'                 => 'nullable|array',
             'dendas.*.jenis_denda'   => 'required|string',
             'dendas.*.total_denda'   => 'required|numeric|min:0',
             'dendas.*.jumlah_hari_telat' => 'nullable|integer|min:0',
             'dendas.*.tarif_denda'   => 'nullable|numeric|min:0',
             'dendas.*.keterangan'    => 'nullable|string',
-            
+
             'alasan_potongan'        => 'nullable|string',
             'metode_pembayaran_id'   => 'required_if:jumlah_bayar,>0|exists:metode_pembayaran,id',
             'jumlah_bayar'           => 'required|numeric|min:0',
@@ -196,7 +196,7 @@ class TransaksiSewaController extends Controller
             if ($request->has('dendas') && is_array($request->dendas)) {
                 foreach ($request->dendas as $dendaItem) {
                     $itemTotal = floatval($dendaItem['total_denda'] ?? 0);
-                    
+
                     if ($itemTotal > 0) {
                         $totalDenda += $itemTotal;
 
@@ -218,12 +218,12 @@ class TransaksiSewaController extends Controller
             if ($deposit) {
                 $jumlahDepositAwal = $deposit->jumlah;
                 $potonganDepositOtomatis = min($totalDenda, $jumlahDepositAwal);
-                
-                $alasanKasir = $request->filled('alasan_potongan') 
-                    ? $request->alasan_potongan 
+
+                $alasanKasir = $request->filled('alasan_potongan')
+                    ? $request->alasan_potongan
                     : "Potongan denda pemakaian.";
 
-                $alasanFinal = $potonganDepositOtomatis > 0 
+                $alasanFinal = $potonganDepositOtomatis > 0
                     ? $alasanKasir . " (Terpotong denda otomatis oleh Admin: Rp " . number_format($potonganDepositOtomatis, 0, ',', '.') . ")"
                     : "Kembali penuh. Selesai tanpa denda.";
 
@@ -255,7 +255,7 @@ class TransaksiSewaController extends Controller
             $transaksi->update([
                 'tanggal_kembali_aktual' => $request->tanggal_kembali_aktual,
                 'total_denda'            => $totalDenda,
-                'total_bayar'            => max(0, $totalSewaDanDendaBersih), 
+                'total_bayar'            => max(0, $totalSewaDanDendaBersih),
                 'status'                 => 'selesai',
             ]);
 
@@ -271,7 +271,7 @@ class TransaksiSewaController extends Controller
 
     public function destroy(TransaksiSewa $transaksi)
     {
-        DB::transaction(function() use ($transaksi) {
+        DB::transaction(function () use ($transaksi) {
             // 1. Kembalikan status armada kendaraan menjadi tersedia kembali
             if ($transaksi->booking && $transaksi->booking->kendaraan) {
                 $transaksi->booking->kendaraan->update(['status' => 'tersedia']);

@@ -9,6 +9,10 @@
 @endsection
 
 @section('content')
+{{-- Load Flatpickr CSS & JS --}}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
 <div class="max-w-2xl mx-auto px-2 sm:px-0">
     <div class="card p-4 sm:p-6">
         <form method="POST" action="{{ route('pelanggan.profil.update') }}" enctype="multipart/form-data">
@@ -22,7 +26,6 @@
                         <img src="{{ asset('storage/' . $pelanggan->foto_profil) }}" class="w-24 h-24 rounded-full object-cover border-2 border-slate-200 shadow-xs" id="preview-avatar">
                     @else
                         <div class="w-24 h-24 rounded-full bg-slate-100 border-2 border-slate-200 flex items-center justify-center font-bold text-slate-700 text-2xl uppercase tracking-wider" id="placeholder-avatar">
-                            {{-- Mengamankan inisial nama jika mengandung tanda petik --}}
                             {{ strtoupper(substr(e($user->name), 0, 2)) }}
                         </div>
                         <img class="w-24 h-24 rounded-full object-cover border-2 border-slate-200 hidden shadow-xs" id="preview-avatar">
@@ -37,11 +40,10 @@
                 </div>
             </div>
 
-            {{-- Grid Responsif: 1 Kolom di HP, 2 Kolom di Laptop --}}
+            {{-- Grid Responsif --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="sm:col-span-2">
                     <label class="form-label mb-1.5 block text-xs font-bold text-slate-500 uppercase tracking-wide">Nama Lengkap</label>
-                    {{-- Beri tanda petik ganda luar pada atribut value agar input menerima tanda petik tunggal dengan aman --}}
                     <input type="text" name="name" value="{{ old('name', $user->name) }}" class="form-input w-full text-sm" required placeholder="Masukkan nama lengkap sesuai identitas">
                     @error('name')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
@@ -65,7 +67,12 @@
 
                 <div>
                     <label class="form-label mb-1.5 block text-xs font-bold text-slate-500 uppercase tracking-wide">Tanggal Lahir</label>
-                    <input type="date" name="tanggal_lahir" value="{{ old('tanggal_lahir', $pelanggan->tanggal_lahir ? $pelanggan->tanggal_lahir->format('Y-m-d') : '') }}" class="form-input w-full text-sm" required>
+                    <input type="text" 
+                        name="tanggal_lahir" 
+                        id="tanggal_lahir"
+                        value="{{ old('tanggal_lahir', $pelanggan->tanggal_lahir ? $pelanggan->tanggal_lahir->format('d-m-Y') : '') }}" 
+                        class="form-input w-full text-sm" 
+                        required>
                 </div>
 
                 <div>
@@ -93,7 +100,7 @@
                 </div>
             </div>
 
-            {{-- Tombol Aksi Mobile Friendly --}}
+            {{-- Tombol Aksi --}}
             <div class="flex flex-col-reverse sm:flex-row gap-3 mt-6 pt-5 border-t border-slate-100">
                 <a href="{{ route('pelanggan.profil.show') }}" class="btn-secondary w-full sm:w-auto flex items-center justify-center text-sm font-semibold h-10 px-5">
                     Batal
@@ -107,6 +114,13 @@
 </div>
 
 <script>
+    // Script Flatpickr
+    flatpickr("#tanggal_lahir", {
+        dateFormat: "d-m-Y",
+        allowInput: true
+    });
+
+    // Script Preview Foto
     document.getElementById('foto_profil').onchange = evt => {
         const [file] = document.getElementById('foto_profil').files;
         if (file) {

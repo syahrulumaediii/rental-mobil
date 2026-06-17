@@ -1,9 +1,21 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 
-// Redirect otomatis ke halaman login jika membuka root URL
-Route::redirect('/', '/login');
+
+// Redirect otomatis jika membuka root URL
+Route::get('/', function () {
+    if (Auth::check()) {
+        return match (Auth::user()->role) {
+            'admin'     => redirect()->route('admin.dashboard'),
+            'kasir'     => redirect()->route('kasir.dashboard'),
+            'pelanggan' => redirect()->route('pelanggan.dashboard'),
+            default     => redirect('/login'),
+        };
+    }
+    return redirect('/login');
+});
 
 // =====================================================================
 // AUTHENTICATION (GUEST & AUTH)
@@ -48,8 +60,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     // Jalur Pengembalian Aktif Admin
     Route::get('transaksi/{transaksi}/pengembalian', [App\Http\Controllers\Admin\TransaksiSewaController::class, 'formPengembalian'])->name('transaksi.form-pengembalian');
     Route::post('transaksi/{transaksi}/pengembalian', [App\Http\Controllers\Admin\TransaksiSewaController::class, 'prosesPengembalian'])->name('transaksi.proses-pengembalian');
-    
-    
+
+
     // Validasi Booking Sisi Admin/Owner (Disinkronkan: approve & reject)
     Route::get('booking',                      [App\Http\Controllers\Admin\BookingController::class, 'index'])->name('booking.index');
     Route::get('booking/{booking}',            [App\Http\Controllers\Admin\BookingController::class, 'show'])->name('booking.show');
@@ -115,6 +127,12 @@ Route::prefix('kasir')->name('kasir.')->middleware(['auth', 'role:kasir'])->grou
     Route::get('booking/{booking}',            [App\Http\Controllers\Kasir\BookingController::class, 'show'])->name('booking.show');
     Route::patch('booking/{booking}/disetujui',  [App\Http\Controllers\Kasir\BookingController::class, 'disetujui'])->name('booking.disetujui');
     Route::patch('booking/{booking}/ditolak',   [App\Http\Controllers\Kasir\BookingController::class, 'ditolak'])->name('booking.ditolak');
+
+    // Walk-In: Pelanggan Datang Langsung ke Tempat (tanpa booking online)
+    Route::get('walk-in',               [App\Http\Controllers\Kasir\WalkInController::class, 'step1'])->name('walkin.step1');
+    Route::post('walk-in/cari',         [App\Http\Controllers\Kasir\WalkInController::class, 'cariPelanggan'])->name('walkin.cari');
+    Route::post('walk-in/step2',        [App\Http\Controllers\Kasir\WalkInController::class, 'step2'])->name('walkin.step2');
+    Route::post('walk-in/store',        [App\Http\Controllers\Kasir\WalkInController::class, 'store'])->name('walkin.store');
 });
 
 // =====================================================================

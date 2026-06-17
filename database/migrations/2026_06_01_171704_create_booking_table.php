@@ -14,6 +14,12 @@ return new class extends Migration
         Schema::create('booking', function (Blueprint $table) {
             $table->id();
             $table->string('kode_booking', 50)->unique();
+            $table->enum('sumber_booking', [
+                'online',
+                'walkin',
+                'admin'
+            ])->default('online');   // perubahan
+            
             $table->foreignId('pelanggan_id')
                 ->constrained('pelanggan')
                 ->restrictOnDelete()
@@ -42,6 +48,12 @@ return new class extends Migration
                 ->nullOnDelete()
                 ->cascadeOnUpdate();
             $table->timestamp('disetujui_at')->nullable();
+            $table->foreignId('dibuat_oleh')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete()
+                ->cascadeOnUpdate(); // perubahan
+
             $table->timestamps();
 
             $table->index('pelanggan_id', 'idx_booking_pelanggan');

@@ -35,20 +35,28 @@
 </div>
 @endif
 
-{{-- Stats --}}
-<div class="grid grid-cols-3 gap-4 mb-6">
+{{-- Stats Grid (🌟 Diubah menjadi sm:grid-cols-2 lg:grid-cols-4 untuk menampung 4 data statistik) --}}
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
     @foreach([
-        ['Total Booking', $stats['total_booking'],  'calendar', 'blue'],
-        ['Booking Aktif', $stats['booking_aktif'],  'clock',    'yellow'],
-        ['Sewa Selesai',  $stats['sewa_selesai'],   'check-circle', 'green'],
+        ['Total Booking', $stats['total_booking'], 'calendar', 'blue'],
+        ['Menunggu Konfirmasi', $stats['booking_konfirmasi'], 'clock', 'yellow'],
+        ['Sewa Aktif (Dipakai)', $stats['sewa_aktif'], 'car', 'indigo'],
+        ['Sewa Selesai', $stats['sewa_selesai'], 'check-circle', 'green'],
     ] as [$lbl,$val,$icon,$color])
-    @php $cl = ['blue'=>['bg'=>'bg-blue-50','ic'=>'text-blue-600','v'=>'text-blue-700'],'yellow'=>['bg'=>'bg-yellow-50','ic'=>'text-yellow-600','v'=>'text-yellow-700'],'green'=>['bg'=>'bg-green-50','ic'=>'text-green-600','v'=>'text-green-700']][$color]; @endphp
-    <div class="card p-5 text-center">
-        <div class="w-10 h-10 {{ $cl['bg'] }} rounded-xl flex items-center justify-center mx-auto mb-2">
+    @php 
+        $cl = [
+            'blue'   => ['bg'=>'bg-blue-50',   'ic'=>'text-blue-600',   'v'=>'text-blue-700'],
+            'yellow' => ['bg'=>'bg-yellow-50', 'ic'=>'text-yellow-600', 'v'=>'text-yellow-700'],
+            'indigo' => ['bg'=>'bg-indigo-50', 'ic'=>'text-indigo-600', 'v'=>'text-indigo-700'], 
+            'green'  => ['bg'=>'bg-green-50',  'ic'=>'text-green-600',  'v'=>'text-green-700']
+        ][$color]; 
+    @endphp
+    <div class="card p-5 text-center flex flex-col justify-center items-center">
+        <div class="w-10 h-10 {{ $cl['bg'] }} rounded-xl flex items-center justify-center mb-2">
             <i data-lucide="{{ $icon }}" class="w-5 h-5 {{ $cl['ic'] }}"></i>
         </div>
         <p class="text-2xl font-extrabold {{ $cl['v'] }}">{{ $val }}</p>
-        <p class="text-xs text-slate-400 mt-0.5">{{ $lbl }}</p>
+        <p class="text-xs text-slate-400 mt-0.5 font-medium">{{ $lbl }}</p>
     </div>
     @endforeach
 </div>
@@ -69,10 +77,20 @@
                 <div class="flex-1 min-w-0">
                     <p class="font-semibold text-slate-700 truncate">{{ $b->kendaraan->nama }}</p>
                     <p class="text-xs text-slate-400 font-mono">{{ $b->kode_booking }}</p>
-                    <p class="text-xs text-slate-400">{{ $b->tanggal_mulai?->format('d M') }} – {{ $b->tanggal_selesai?->format('d M Y') }}</p>
+                    <p class="text-xs text-slate-400">{{ $b->tanggal_mulai?->format('d M H:i') }} – {{ $b->tanggal_selesai?->format('d M Y H:i') }}</p>
                 </div>
-                @php $sc = ['pending'=>'badge-yellow','disetujui'=>'badge-blue','berlangsung'=>'badge-green','selesai'=>'badge-gray','ditolak'=>'badge-red','dibatalkan'=>'badge-red']; @endphp
-                <span class="badge {{ $sc[$b->status] ?? 'badge-gray' }}">{{ ucfirst($b->status) }}</span>
+                @php 
+                    $sc = [
+                        'pending'     => 'badge-yellow',
+                        'disetujui'   => 'badge-blue',
+                        'aktif'       => 'badge-indigo', 
+                        'berlangsung' => 'badge-green',
+                        'selesai'     => 'badge-gray',
+                        'ditolak'     => 'badge-red',
+                        'dibatalkan'  => 'badge-red'
+                    ]; 
+                @endphp
+                <span class="badge {{ $sc[$b->status] ?? 'badge-gray' }} font-bold uppercase text-[10px] tracking-wide">{{ $b->status }}</span>
             </div>
             @empty
             <div class="px-5 py-10 text-center">

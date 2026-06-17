@@ -17,14 +17,24 @@
 <div class="max-w-2xl mx-auto space-y-5">
     <div class="card p-6">
         <div class="flex items-center gap-5 mb-6">
-            <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center font-extrabold text-primary-700 text-2xl shrink-0">
-                {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
-            </div>
+            <div class="w-16 h-16 shrink-0">
+                    @if($pelanggan->foto_profil)
+                        <img src="{{ asset('storage/' . $pelanggan->foto_profil) }}" 
+                            alt="Foto Profil" 
+                            class="w-16 h-16 rounded-full object-cover border border-slate-200">
+                    @else
+                        <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center font-extrabold text-primary-700 text-2xl uppercase">
+                            {{ strtoupper(substr($user->name, 0, 2)) }}
+                        </div>
+                    @endif
+                </div>
             <div>
                 <h2 class="font-extrabold text-slate-800 text-xl">{{ $user->name }}</h2>
                 <p class="text-slate-400 text-sm">{{ $user->email }}</p>
                 <p class="text-slate-400 text-sm">{{ $user->phone }}</p>
             </div>
+
+            
             <div class="ml-auto">
                 @php $sv = ['belum_verifikasi'=>['badge-gray','Belum Verifikasi'],'pending'=>['badge-yellow','Pending'],'verified'=>['badge-green','Terverifikasi'],'rejected'=>['badge-red','Rejected']]; @endphp
                 <span class="badge {{ $sv[$pelanggan->status_verifikasi ?? 'belum_verifikasi'][0] }}">

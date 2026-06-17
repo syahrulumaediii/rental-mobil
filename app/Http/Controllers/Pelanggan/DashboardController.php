@@ -14,11 +14,15 @@ class DashboardController extends Controller
         $pelanggan = $user->pelanggan;
 
         $stats = [
-            'total_booking'    => $pelanggan?->booking()->count() ?? 0,
-            'booking_aktif'    => $pelanggan?->booking()->whereIn('status', ['pending', 'disetujui', 'berlangsung'])->count() ?? 0,
-            'sewa_selesai'     => $pelanggan?->booking()->where('status', 'selesai')->count() ?? 0,
-            'is_verified'      => $pelanggan?->isVerified() ?? false,
-            'is_blacklisted'   => $pelanggan?->isBlacklisted() ?? false,
+            'total_booking'      => $pelanggan?->booking()->count() ?? 0,
+            'booking_konfirmasi' => $pelanggan?->booking()->where('status', 'pending')->count() ?? 0,
+
+            // 🌟 EDIT: Mengganti key & memastikan data sewa yang sedang berjalan terhitung
+            'sewa_aktif'         => $pelanggan?->booking()->where('status', 'aktif')->count() ?? 0,
+
+            'sewa_selesai'       => $pelanggan?->booking()->where('status', 'selesai')->count() ?? 0,
+            'is_verified'        => $pelanggan?->isVerified() ?? false,
+            'is_blacklisted'     => $pelanggan?->isBlacklisted() ?? false,
         ];
 
         $booking_terbaru = $pelanggan?->booking()

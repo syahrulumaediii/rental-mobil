@@ -81,57 +81,49 @@
 <body class="text-ink antialiased">
 
 {{-- Mobile Overlay (Hanya aktif di layar HP/Tablet) --}}
-<div x-show="sidebarOpen" x-cloak @click="sidebarOpen=false"
-     class="fixed inset-0 bg-slate-900/40 z-40 lg:hidden backdrop-blur-sm" 
-     x-transition:enter="transition duration-200 ease-out"
+<div x-show="sidebarOpen" 
+     x-cloak 
+     @click="sidebarOpen = false"
+     class="fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm lg:hidden" 
+     x-transition:enter="transition-opacity ease-linear duration-300"
      x-transition:enter-start="opacity-0" 
      x-transition:enter-end="opacity-100"
-     x-transition:leave="transition duration-150 ease-in"
+     x-transition:leave="transition-opacity ease-linear duration-300"
      x-transition:leave-start="opacity-100" 
-     x-transition:leave-end="opacity-0"></div>
+     x-transition:leave-end="opacity-0">
+</div>
 
 <div class="flex h-screen overflow-hidden relative">
 
     {{-- SIDEBAR - Transisi Geser Halus & Responsif --}}
     <aside class="fixed lg:relative z-50 h-full bg-white border-r border-slate-100 flex flex-col transition-all duration-300 ease-in-out"
-           :class="sidebarOpen ? 'w-64 translate-x-0' : '-translate-x-full lg:translate-x-0 w-64 lg:w-0 lg:border-r-0 overflow-hidden'">
+        :class="sidebarOpen ? 'w-64 translate-x-0' : '-translate-x-full lg:translate-x-0 w-64 lg:w-0 lg:border-r-0 overflow-hidden'">
 
-        {{-- Logo & Identitas Aplikasi --}}
-        <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between gap-3 min-w-[256px]">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 bg-primary-600 rounded-xl flex items-center justify-center shrink-0">
-                    <i data-lucide="car" class="w-5 h-5 text-white"></i>
-                </div>
-                <div class="truncate">
-                    <div class="font-bold text-slate-800 leading-none truncate">Rull Car</div>
-                    <div class="text-[10px] text-slate-400 font-mono mt-0.5">{{ ucfirst(auth()->user()->role ?? 'Kasir') }}</div>
-                </div>
+        {{-- 1. Logo & Nama Aplikasi --}}
+        <div class="px-6 py-5 border-b border-slate-100 flex items-center gap-3 min-w-[256px]">
+            <div class="w-9 h-9 bg-primary-600 rounded-xl flex items-center justify-center shrink-0">
+                <i data-lucide="car" class="w-5 h-5 text-white"></i>
             </div>
-            {{-- Tombol Tutup Sidebar Khusus Mobile --}}
-            <button @click="sidebarOpen=false" class="lg:hidden p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-50 cursor-pointer">
+            <div class="truncate" x-show="sidebarOpen" x-transition>
+                <div class="font-bold text-slate-800 leading-none">Rull Car</div>
+            </div>
+            
+            {{-- Tombol Tutup Mobile --}}
+            <button @click="sidebarOpen=false" class="lg:hidden ml-auto p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-50">
                 <i data-lucide="x" class="w-5 h-5"></i>
             </button>
         </div>
 
-        {{-- Navigasi Menu Dinamis --}}
+        {{-- 2. Area Navigasi --}}
         <div class="flex-1 overflow-y-auto px-3 py-4 space-y-0.5 min-w-[256px]">
             @yield('sidebar-nav')
         </div>
 
-        {{-- Footer Pengguna Terlog-in --}}
-        <div class="px-4 py-4 border-t border-slate-100 min-w-[256px] bg-slate-50/50">
-            <div class="flex items-center gap-3 mb-3">
-                <div class="w-9 h-9 rounded-full bg-primary-100 flex items-center justify-center font-bold text-primary-700 text-sm shrink-0">
-                    {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 2)) }}
-                </div>
-                <div class="flex-1 min-w-0">
-                    <div class="text-sm font-semibold text-slate-800 truncate">{{ auth()->user()->name ?? 'User' }}</div>
-                    <div class="text-xs text-slate-400 truncate">{{ auth()->user()->email ?? '' }}</div>
-                </div>
-            </div>
+        {{-- 3. Tombol Keluar --}}
+        <div class="p-4 border-t border-slate-100 min-w-[256px]">
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-500 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer font-medium">
+                <button type="submit" class="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors font-medium">
                     <i data-lucide="log-out" class="w-4 h-4"></i> Keluar
                 </button>
             </form>
@@ -150,22 +142,31 @@
                 </button>
                 
                 {{-- Detail Judul & Jam Real-Time --}}
-                <div class="min-w-0">
-                    <h1 class="text-base sm:text-lg font-bold text-slate-800 truncate leading-tight">@yield('page-title', 'Dashboard')</h1>
-                    
+            <div class="min-w-0">
+                <h1 class="text-base sm:text-lg font-bold text-slate-800 truncate leading-tight">@yield('page-title', 'Dashboard')</h1>
+                
                     {{-- Fitur Jam Real-Time Berjalan (Alpine.js) --}}
                     <div x-data="{ 
                             currentTime: '',
                             updateTime() {
+                                constNow = new Date();
+
                                 const options = { 
                                     weekday: 'short', 
                                     year: 'numeric', 
                                     month: 'short', 
                                     day: 'numeric',
                                     hour: '2-digit',
-                                    minute: '2-digit'
+                                    minute: '2-digit',
+                                    second: '2-digit',
                                 };
-                                this.currentTime = new Date().toLocaleDateString('id-ID', options) + ' WIB';
+
+                                {{-- Contoh hasil: 'Kam, 11 Jun 2026 22.08.11' --}}
+                                let rawString = new Date().toLocaleString('id-ID', options);
+                                let parts = rawString.split(' ');
+                                let jam = parts.pop().replace(/\./g, ':'); // Ambil bagian jam saja
+                                let tanggal = parts.join(' ');
+                                this.currentTime = `${tanggal} - Pukul ${jam} WIB`;
                             }
                         }"
                         x-init="updateTime(); setInterval(() => updateTime(), 1000)"
@@ -180,29 +181,58 @@
                 </div>
             </div>
 
-            {{-- Sisi Kanan Topbar (Aksi Ekstra & Notifikasi) --}}
+
+            {{-- Sisi Kanan Topbar --}}
             <div class="flex items-center gap-2 sm:gap-3 shrink-0">
                 @yield('topbar-actions')
                 
-                {{-- Notifikasi Khusus Pelanggan --}}
-                @if(auth()->check() && auth()->user()->role === 'pelanggan')
-                    @php 
-                        $unread = \Illuminate\Support\Facades\DB::table('notifikasi')
-                            ->where('user_id', auth()->id())
-                            ->whereNull('read_at')
-                            ->count(); 
-                    @endphp
-                    
-                    <a href="{{ route('pelanggan.notifikasi.index') }}" class="relative p-2 text-slate-500 hover:text-primary-600 hover:bg-slate-50 rounded-lg transition-colors">
-                        <i data-lucide="bell" class="w-5 h-5"></i>
+                @if(auth()->check())
+                    {{-- LOGIKA UNTUK PELANGGAN --}}
+                    @if(auth()->user()->role === 'pelanggan')
+                        @php 
+                            $unread = \Illuminate\Support\Facades\DB::table('notifikasi')
+                                        ->where('user_id', auth()->id())
+                                        ->whereNull('read_at')
+                                        ->count(); 
+                        @endphp
                         
-                        @if($unread > 0)
-                            <span class="absolute top-0.5 right-0.5 min-w-[16px] h-4 bg-red-500 text-white text-[9px] font-extrabold rounded-full flex items-center justify-center px-1 border border-white shadow-sm">
-                                {{ $unread > 99 ? '99+' : $unread }}
-                            </span>
-                            <span class="absolute top-0.5 right-0.5 min-w-[16px] h-4 bg-red-500 rounded-full animate-ping opacity-25 -z-10"></span>
-                        @endif
-                    </a>
+                        <a href="{{ route('pelanggan.notifikasi.index') }}" class="relative p-2 text-slate-500 hover:text-primary-600 hover:bg-slate-50 rounded-lg transition-colors">
+                            <i data-lucide="bell" class="w-5 h-5"></i>
+                            @if($unread > 0)
+                                <span class="absolute top-0.5 right-0.5 min-w-4 h-4 bg-red-500 text-white text-[9px] font-extrabold rounded-full flex items-center justify-center px-1 border border-white shadow-sm">
+                                    {{ $unread > 99 ? '99+' : $unread }}
+                                </span>
+                            @endif
+                        </a>
+
+                    {{-- LOGIKA UNTUK KASIR (DIPISAH DENGAN DIV) --}}
+                    @elseif(auth()->user()->role === 'kasir')
+                        <div class="flex items-center gap-2">
+                            {{-- Tombol Lonceng (Total Gabungan) --}}
+                            <button @click="sidebarOpen = true" 
+                                    class="relative p-2 text-slate-500 hover:text-primary-600 hover:bg-slate-50 rounded-lg transition-colors">
+                                <i data-lucide="bell" class="w-5 h-5"></i>
+                                
+                                {{-- Kita gunakan $totalNotif untuk badge lonceng --}}
+                                @if($totalNotif > 0)
+                                    <span class="absolute top-0.5 right-0.5 min-w-4 h-4 bg-red-500 text-white text-[9px] font-extrabold rounded-full flex items-center justify-center px-1 border border-white shadow-sm">
+                                        {{ $totalNotif > 99 ? '99+' : $totalNotif }}
+                                    </span>
+                                    {{-- Animasi ping tetap bisa dipertahankan --}}
+                                    <span class="absolute top-0.5 right-0.5 min-w-4 h-4 bg-red-500 rounded-full animate-ping opacity-25"></span>
+                                @endif
+                            </button>
+
+                            {{-- Alert Transaksi Telat (Link A, terpisah dari Button) --}}
+                            @if($telatCount > 0)
+                                <a href="{{ route('kasir.transaksi.index', ['status' => 'berjalan']) }}" 
+                                class="flex items-center gap-1 bg-amber-50 text-amber-700 px-2 py-1 rounded-lg text-xs font-bold border border-amber-200 animate-pulse transition-all hover:bg-amber-100">
+                                    <i data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+                                    {{ $telatCount }} Telat
+                                </a>
+                            @endif
+                        </div>
+                    @endif
                 @endif
             </div>
         </header>

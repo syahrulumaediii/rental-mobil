@@ -35,14 +35,14 @@
                 @foreach([
                     ['Pelanggan',          $transaksi->booking->pelanggan->user->name ?? '-'],
                     ['Kendaraan',          ($transaksi->booking->kendaraan->nama ?? '-').' ('.(($transaksi->booking->kendaraan->plat_nomor) ?? '-').')'],
-                    ['Tgl Ambil Aktual',   $transaksi->tanggal_ambil_aktual?->format('d M Y') ?? '-'],
-                    ['Tgl Kembali Plan',   $transaksi->booking->tanggal_selesai?->format('d M Y') ?? '-'],
-                    ['Tgl Kembali Aktual', $transaksi->tanggal_kembali_aktual?->format('d M Y') ?? '-'],
+                    ['Tgl Ambil Aktual',   $transaksi->tanggal_ambil_aktual?->format('d M Y H:i') ?? '-'],
+                    ['Tgl Kembali Plan',   $transaksi->booking->tanggal_selesai?->format('d M Y H:i') ?? '-'],
+                    ['Tgl Kembali Aktual', $transaksi->tanggal_kembali_aktual?->format('d M Y H:i') ?? '-'],
                     ['Kasir Pelaksana',    $transaksi->kasir->name ?? '-'],
                 ] as [$lbl,$val])
                 <div class="flex flex-col sm:flex-row sm:justify-between py-2 border-b border-slate-50 last:border-0 sm:last:border-b">
                     <span class="text-xs text-slate-400 uppercase tracking-wider sm:normal-case sm:text-sm">{{ $lbl }}</span>
-                    <span class="font-medium text-slate-700 sm:text-right mt-0.5 sm:mt-0 break-words">{{ $val }}</span>
+                    <span class="font-medium text-slate-700 sm:text-right mt-0.5 sm:mt-0 wrap-break-word">{{ $val }}</span>
                 </div>
                 @endforeach
             </div>
@@ -79,7 +79,7 @@
                             <span class="font-medium font-mono text-slate-700">{{ number_format($k->km_odometer, 0, ',', '.') }} km</span>
                         </div>
                         @if($k->catatan_kondisi)
-                        <div class="mt-2 bg-white border border-slate-200/60 rounded-lg p-2 text-xs text-slate-500 italic break-words">
+                        <div class="mt-2 bg-white border border-slate-200/60 rounded-lg p-2 text-xs text-slate-500 italic wrap-break-word">
                             <strong>Catatan:</strong> {{ $k->catatan_kondisi }}
                         </div>
                         @endif
@@ -105,7 +105,7 @@
             
             {{-- Proteksi Table dengan scroll x jika dibuka via handphone --}}
             <div class="overflow-x-auto whitespace-nowrap">
-                <table class="w-full text-left border-collapse min-w-[500px]">
+                <table class="w-full text-left border-collapse min-w-125">
                     <thead>
                         <tr class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-100">
                             <th class="px-5 py-3 font-semibold">Tanggal</th>
@@ -251,11 +251,11 @@
                     <span class="absolute top-2 right-3 text-[10px] text-slate-400 uppercase font-bold bg-white px-2 py-0.5 rounded-full border border-slate-100">
                         {{ $d->jumlah_hari_telat > 0 ? $d->jumlah_hari_telat . ' Satuan' : 'Fixed Rate' }}
                     </span>
-                    <p class="font-bold text-red-800 text-xs uppercase tracking-wide pr-16 break-words">
+                    <p class="font-bold text-red-800 text-xs uppercase tracking-wide pr-16 wrap-break-word">
                         {{ str_replace('_', ' ', $d->jenis_denda) }}
                     </p>
                     @if($d->keterangan)
-                    <p class="text-slate-500 text-xs mt-0.5 leading-relaxed break-words">{{ $d->keterangan }}</p>
+                    <p class="text-slate-500 text-xs mt-0.5 leading-relaxed wrap-break-word">{{ $d->keterangan }}</p>
                     @endif
                     
                     @if($d->tarif_denda > 0)

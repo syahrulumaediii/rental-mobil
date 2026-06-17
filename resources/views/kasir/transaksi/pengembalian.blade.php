@@ -9,28 +9,33 @@
 @endsection
 
 @section('content')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script> ```
 
 @vite('resources/js/transaksi/pengembalian.js')
 
 <div class="max-w-3xl mx-auto space-y-5 px-1 sm:px-0">
+@php
+    // Status pembayaran sewa
+    $pembayaranSewa = $transaksi->pembayaran
+        ->where('status', 'lunas')
+        ->sortBy('created_at')
+        ->first();
+    $sewaSudahLunas = $pembayaranSewa !== null;
 
-    @php
-        // Status pembayaran sewa (pembayaran pertama = pelunasan sewa)
-        $pembayaranSewa = $transaksi->pembayaran
-            ->where('status', 'lunas')
-            ->sortBy('created_at')
-            ->first();
-        $sewaSudahLunas = $pembayaranSewa !== null;
+    // Deposit yang masih ditahan
+    $jumlahDeposit  = $transaksi->deposit?->jumlah ?? 0;
 
-        // Deposit yang masih ditahan
-        $jumlahDeposit  = $transaksi->deposit?->jumlah ?? 0;
-
-        // Keterlambatan
-        $batasKembali   = $transaksi->booking->tanggal_selesai;
-        $sekarang       = now();
-        $telat          = $sekarang->gt($batasKembali);
-        $hariTelat      = $telat ? (int) $sekarang->diffInDays($batasKembali) : 0;
-    @endphp
+    // Keterlambatan
+    $batasKembali   = $transaksi->booking->tanggal_selesai;
+    $sekarang       = now();
+    
+    // Definisikan variabel yang digunakan di JavaScript
+    $isTelat        = $sekarang->gt($batasKembali); // Perubahan: menggunakan nama $isTelat
+    $hariTelat      = $isTelat ? (int) $sekarang->diffInDays($batasKembali) : 0;
+    $jamTelat       = $isTelat ? (int) $sekarang->diffInHours($batasKembali) : 0;
+@endphp
 
     {{-- ================================================================== --}}
     {{-- INFO TRANSAKSI                                                     --}}
@@ -46,8 +51,9 @@
                 ['Kode Transaksi',   $transaksi->kode_transaksi],
                 ['Pelanggan',        $transaksi->booking->pelanggan->user->name],
                 ['Kendaraan',        $transaksi->booking->kendaraan->nama.' ('.$transaksi->booking->kendaraan->plat_nomor.')'],
-                ['Tgl Pengambilan',  $transaksi->tanggal_ambil_aktual?->format('d M Y')],
-                ['Tgl Kembali Plan', $batasKembali?->format('d M Y')],
+                // Tambahkan H:i di akhir format
+                ['Tgl Pengambilan', $transaksi->tanggal_ambil_aktual?->translatedFormat('d F Y  H:i')], 
+                ['Tgl Kembali Plan', $batasKembali?->translatedFormat('d F Y  H:i')],
                 ['Total Biaya Sewa', 'Rp '.number_format($transaksi->total_biaya, 0, ',', '.')],
                 ['Deposit Ditahan',  'Rp '.number_format($jumlahDeposit, 0, ',', '.')],
             ] as [$lbl, $val])
@@ -74,7 +80,8 @@
             </div>
         </div>
 
-        @if($telat)
+        {{-- Ganti $telat menjadi $isTelat --}}
+        @if($isTelat) 
         <div class="mt-4 flex items-start gap-3 bg-red-50 border border-red-200 px-4 py-3 rounded-xl text-xs sm:text-sm text-red-700">
             <i data-lucide="triangle-alert" class="w-5 h-5 shrink-0 mt-0.5"></i>
             <div>
@@ -100,10 +107,10 @@
 
     <div id="pengembalian-data" 
         class="hidden"
-        data-old-dendas="{{ json_encode(old('dendas', [])) }}"
-        data-hari-telat="{{ $hariTelat }}"
-        data-telat="{{ $telat ? 'true' : 'false' }}"
-        data-jumlah-deposit="{{ $jumlahDeposit }}">
+        data-jam-telat="{{ $jamTelat ?? 0 }}"
+        data-telat="{{ $isTelat ? 'true' : 'false' }}"
+        data-tarif-denda-jam="{{ $transaksi->booking->kendaraan->denda_per_jam ?? 0 }}" 
+        data-old-dendas="{{ json_encode(old('dendas')) }}">
     </div>
 
     <div class="space-y-5">
@@ -113,7 +120,14 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="form-label">Tanggal Kembali Aktual</label>
-                    <input type="date" name="tanggal_kembali_aktual" value="{{ old('tanggal_kembali_aktual', date('Y-m-d')) }}" class="form-input" required>
+                    <input 
+                        type="text" 
+                        id="tanggal_kembali_aktual" 
+                        name="tanggal_kembali_aktual" 
+                        value="{{ old('tanggal_kembali_aktual', now()->format('d-m-Y H:i')) }}" 
+                        class="form-input" 
+                        placeholder="Klik untuk pilih tanggal & waktu"
+                        required>
                 </div>
                 <div>
                     <label class="form-label">Kondisi Bahan Bakar</label>
@@ -264,6 +278,41 @@
     </div>
 </form>
 
-</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        flatpickr("#tanggal_kembali_aktual", {
+            enableTime: true,
+            time_24hr: true,
+            dateFormat: "d-m-Y H:i", // Format yang dikirim ke database/controller
+            locale: "id",           // Menggunakan bahasa Indonesia
+            allowInput: true        // Memungkinkan user mengetik manual jika mau
+        });
+    });
+
+// Di dalam pengembalian.js
+const elData = document.getElementById('pengembalian-data');
+const tarifDendaPerJam = parseFloat(elData.dataset.tarifDendaJam) || 0;
+
+function hitungTotalDenda() {
+    let totalDenda = 0;
+    
+    // Gunakan .denda-row agar sesuai dengan yang dibuat di fungsi tambahBarisDenda
+    document.querySelectorAll('.denda-row').forEach(item => {
+        // Ambil input tarif dan jam sesuai dengan class yang didefinisikan di HTML
+        let tarif = parseFloat(item.querySelector('.input-tarif-denda').value) || 0;
+        let jam = parseFloat(item.querySelector('.input-pengali').value) || 0; // Sesuaikan dengan class .input-pengali
+        
+        let subtotal = tarif * jam;
+        
+        // Update input total denda di baris tersebut
+        item.querySelector('.input-total-denda').value = subtotal;
+        
+        totalDenda += subtotal;
+    });
+
+    // Update ringkasan global (panggil fungsi updateRingkasan yang sudah Anda miliki)
+    updateRingkasan();
+}
+</script>
 
 @endsection

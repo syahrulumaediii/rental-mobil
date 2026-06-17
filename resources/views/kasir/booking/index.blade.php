@@ -9,6 +9,26 @@
 @endsection
 
 @section('content')
+
+{{-- BANNER NOTIFIKASI --}}
+@if(isset($pendingCount) && $pendingCount > 0)
+<div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-5 flex items-center justify-between shadow-sm">
+    <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center text-amber-600">
+            <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+        </div>
+        <div>
+            <h4 class="font-bold text-amber-900">Perhatian: Ada Booking Baru!</h4>
+            <p class="text-sm text-amber-700">Terdapat <strong>{{ $pendingCount }} booking</strong> yang menunggu konfirmasi Anda.</p>
+        </div>
+    </div>
+    {{-- <a href="{{ route('kasir.booking.index', ['status' => 'pending']) }}" 
+       class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-sm font-bold rounded-lg transition-colors">
+        Lihat Sekarang
+    </a> --}}
+</div>
+@endif
+
 <div class="card p-4 mb-5">
     <form method="GET" class="flex flex-wrap gap-3 items-end">
         <div class="flex-1 min-w-44">
@@ -33,77 +53,85 @@
 </div>
 
 <div class="card overflow-hidden">
-    <table>
+    <table class="w-full">
         <thead>
-            <tr>
-                <th>Kode Booking</th>
-                <th>Pelanggan</th>
-                <th>Kendaraan</th>
-                <th>Periode</th>
-                <th>Estimasi Biaya</th>
-                <th>Status</th>
-                <th>Aksi</th>
+            <tr class="text-left text-xs uppercase text-slate-400">
+                <th class="p-4">Kode Booking</th>
+                <th class="p-4">Pelanggan</th>
+                <th class="p-4">Kendaraan</th>
+                <th class="p-4">Periode</th>
+                <th class="p-4">Biaya</th>
+                <th class="p-4">Sumber</th>
+                <th class="p-4">Status</th>
+                <th class="p-4 text-right">Aksi</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody class="divide-y divide-slate-100">
             @forelse($booking as $b)
             <tr>
-                <td><span class="font-mono text-xs font-bold text-slate-600">{{ $b->kode_booking }}</span></td>
-                <td>
-                    <p class="font-semibold text-slate-700">{{ $b->pelanggan->user->name }}</p>
+                <td class="p-4"><span class="font-mono text-xs font-bold text-slate-600">{{ $b->kode_booking }}</span></td>
+                <td class="p-4">
+                    <p class="font-semibold text-slate-700 text-sm">{{ $b->pelanggan->user->name }}</p>
                     <p class="text-xs text-slate-400">{{ $b->pelanggan->user->phone }}</p>
                 </td>
-                <td>
-                    <p class="font-medium text-slate-700">{{ $b->kendaraan->nama }}</p>
+                <td class="p-4">
+                    <p class="font-medium text-slate-700 text-sm">{{ $b->kendaraan->nama }}</p>
                     <p class="text-xs text-slate-400 font-mono">{{ $b->kendaraan->plat_nomor }}</p>
                 </td>
-                <td>
+                <td class="p-4">
                     <p class="text-sm text-slate-600">{{ $b->tanggal_mulai->format('d M Y') }}</p>
                     <p class="text-xs text-slate-400">s/d {{ $b->tanggal_selesai->format('d M Y') }} · {{ $b->durasi_hari }} hari</p>
                 </td>
-                <td class="font-semibold text-slate-700">Rp {{ number_format($b->estimasi_biaya, 0, ',', '.') }}</td>
-                <td>
-                    {{-- DI SINI: Mapping badge warna sudah disesuaikan ke status 'aktif' --}}
+                <td class="p-4 font-semibold text-slate-700 text-sm">Rp {{ number_format($b->estimasi_biaya, 0, ',', '.') }}</td>
+                
+                {{-- Kolom Sumber & Dibuat Oleh --}}
+                <td class="p-4">
+                    <span class="badge {{ $b->sumber_booking === 'online' ? 'badge-blue' : 'badge-purple' }} text-[10px] px-2 py-1">
+                        {{ strtoupper($b->sumber_booking) }}
+                    </span>
+                    
+                    @if($b->dibuatOleh)
+                        <p class="text-[10px] text-slate-400 mt-1 truncate max-w-25" title="Dibuat oleh: {{ $b->dibuatOleh->name }}">
+                            Oleh: {{ explode(' ', $b->dibuatOleh->name)[0] }}
+                        </p>
+                    @endif
+                </td>
+
+                <td class="p-4">
                     @php $sc = ['pending'=>'badge-yellow','disetujui'=>'badge-blue','ditolak'=>'badge-red','aktif'=>'badge-green','selesai'=>'badge-gray','dibatalkan'=>'badge-red']; @endphp
                     <span class="badge {{ $sc[$b->status] ?? 'badge-gray' }}">{{ ucfirst($b->status) }}</span>
                 </td>
-                <td>
+                
+                <td class="p-4 text-right">
                     <div class="flex items-center gap-1.5 justify-end">
-                        <a href="{{ route('kasir.booking.show', $b) }}" class="p-1.5 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors" title="Lihat Detail">
+                        <a href="{{ route('kasir.booking.show', $b) }}" class="p-1.5 text-slate-400 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors">
                             <i data-lucide="eye" class="w-4 h-4"></i>
                         </a>
                         
                         @if($b->status === 'pending')
                         <form method="POST" action="{{ route('kasir.booking.disetujui', $b) }}">
                             @csrf @method('PATCH')
-                            <button class="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Setujui Booking">
+                            <button class="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors">
                                 <i data-lucide="check" class="w-4 h-4"></i>
                             </button>
                         </form>
-                        <button onclick="openRejectModal({{ $b->id }})" class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Tolak Booking">
+                        <button onclick="openRejectModal({{ $b->id }})" class="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
                             <i data-lucide="x" class="w-4 h-4"></i>
                         </button>
-
                         @elseif($b->status === 'disetujui')
-                        {{-- DI SINI: Tombol dialihkan ke route serah terima kasir --}}
                         <a href="{{ route('kasir.transaksi.serah-terima', $b->id) }}" 
-                           class="px-2.5 py-1 text-xs font-bold bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg border border-blue-200 transition-all flex items-center gap-1" 
-                           title="Proses Serah Terima Mobil">
-                            <i data-lucide="key" class="w-3.5 h-3.5"></i>
-                            Serah Terima
+                           class="px-2.5 py-1 text-xs font-bold bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-lg border border-blue-200 transition-all flex items-center gap-1">
+                            <i data-lucide="key" class="w-3.5 h-3.5"></i> Serah Terima
                         </a>
                         @endif
                     </div>
                 </td>
             </tr>
             @empty
-            <tr><td colspan="7" class="text-center py-12 text-slate-400">Tidak ada data booking</td></tr>
+            <tr><td colspan="8" class="text-center py-12 text-slate-400">Tidak ada data booking</td></tr>
             @endforelse
         </tbody>
     </table>
-    @if($booking->hasPages())
-    <div class="px-5 py-4 border-t border-slate-50">{{ $booking->withQueryString()->links() }}</div>
-    @endif
 </div>
 
 {{-- Reject Modal --}}

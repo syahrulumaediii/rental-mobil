@@ -8,6 +8,7 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/css/auth/login.css',
+                'resources/css/auth/register.css',
                 'resources/js/auth/login.js',
                 'resources/js/transaksi/pengembalian.js',
                 'resources/js/app.js'
@@ -17,11 +18,11 @@ export default defineConfig({
         tailwindcss(),
     ],
 
-    server: {
-        host: '0.0.0.0', // Membuka akses Vite ke jaringan lokal
-        hmr: {
-            host: '192.168.1.12', // Tetap gunakan localhost untuk Hot Module Replacement di PC
-        },
-    },
+    // server: {
+    //     host: '0.0.0.0', // Membuka akses Vite ke jaringan lokal
+    //     hmr: {
+    //         host: '192.168.1.13', // Tetap gunakan localhost untuk Hot Module Replacement di PC
+    //     },
+    // },
 
 });

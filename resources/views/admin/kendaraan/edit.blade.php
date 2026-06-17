@@ -56,6 +56,7 @@
                 <div>
                     <label class="form-label mb-1.5 block text-xs font-bold text-slate-500 uppercase tracking-wide">Plat Nomor</label>
                     <input type="text" name="plat_nomor" value="{{ old('plat_nomor', $kendaraan->plat_nomor ?? '') }}" class="form-input w-full text-sm font-mono uppercase tracking-wider" required placeholder="B 1234 ABC">
+                    @error('plat_nomor')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
@@ -91,15 +92,25 @@
                 <div>
                     <label class="form-label mb-1.5 block text-xs font-bold text-slate-500 uppercase tracking-wide">Tarif Harian (Rp)</label>
                     <input type="number" name="tarif_harian" value="{{ old('tarif_harian', $kendaraan->tarif_harian ?? '') }}" class="form-input w-full text-sm font-semibold text-slate-700" required min="0" step="1000" placeholder="300000">
+                    @error('tarif_harian')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
 
+                {{-- 🌟 BARU: Input Nilai Denda Keterlambatan Per Jam --}}
                 <div>
+                    <label class="form-label mb-1.5 block text-xs font-bold text-slate-500 uppercase tracking-wide">Denda Terlambat / Jam (Rp)</label>
+                    <input type="number" name="denda_per_jam" value="{{ old('denda_per_jam', $kendaraan->denda_per_jam ?? '') }}" class="form-input w-full text-sm font-semibold text-amber-700 border-amber-200 bg-amber-50/10 focus:border-amber-400 focus:ring-amber-400" required min="0" step="1000" placeholder="25000">
+                    @error('denda_per_jam')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
+                </div>
+
+                <div class="md:col-span-2">
                     <label class="form-label mb-1.5 block text-xs font-bold text-slate-500 uppercase tracking-wide">Status</label>
                     <select name="status" class="form-input w-full text-sm" required>
-                        @foreach(['tersedia'=>'Tersedia','disewa'=>'Disewa','perawatan'=>'Perawatan'] as $val=>$lbl)
+                        {{-- 🌟 Status 'rusak' dipetakan masuk --}}
+                        @foreach(['aktif'=>'Aktif','non-aktif'=>'Non-Aktif','servis'=>'Service','rusak'=>'Rusak'] as $val=>$lbl)
                         <option value="{{ $val }}" {{ old('status', $kendaraan->status ?? 'tersedia') === $val ? 'selected' : '' }}>{{ $lbl }}</option>
                         @endforeach
                     </select>
+                    @error('status')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror
                 </div>
 
                 <div class="md:col-span-2">

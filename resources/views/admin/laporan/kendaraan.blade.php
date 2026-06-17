@@ -33,9 +33,10 @@
             <label class="block text-xs font-bold text-slate-500 uppercase mb-1.5">Status Unit</label>
             <select name="status" class="form-input w-full text-sm">
                 <option value="">Semua Status</option>
-                <option value="tersedia" {{ request('status') == 'tersedia' ? 'selected' : '' }}>Tersedia</option>
+                <option value="aktif" {{ request('status') == 'aktif' ? 'selected' : '' }}>Aktif</option>
+                <option value="non-aktif" {{ request('status') == 'non-aktif' ? 'selected' : '' }}>Non-Aktif</option>
                 <option value="disewa" {{ request('status') == 'disewa' ? 'selected' : '' }}>Disewa</option>
-                <option value="perawatan" {{ request('status') == 'perawatan' ? 'selected' : '' }}>Perawatan</option>
+                <option value="servis" {{ request('status') == 'servis' ? 'selected' : '' }}>Servis</option>
             </select>
         </div>
         <div class="w-full lg:w-auto pt-2 lg:pt-0">
@@ -66,7 +67,7 @@
         </div>
         <div>
             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide">Siap Jalan</p>
-            <p class="text-base sm:text-lg font-extrabold text-green-600 mt-0.5">{{ $summary['unit_tersedia'] }} Unit</p>
+            <p class="text-base sm:text-lg font-extrabold text-green-600 mt-0.5">{{ $summary['unit_aktif'] }} Unit</p>
         </div>
     </div>
 
@@ -144,37 +145,55 @@
                                     <i data-lucide="image" class="w-4 h-4"></i>
                                 </div>
                             @endif
+
                             <div>
-                                <span class="font-bold text-slate-800 block text-sm">{{ $k->merk }} {{ $k->nama }}</span>
-                                <span class="font-mono bg-slate-100 text-slate-600 font-bold px-1.5 py-0.5 rounded text-[10px] inline-block mt-1 uppercase tracking-wider border border-slate-200/40">{{ $k->plat_nomor }}</span>
+                                <span class="font-bold text-slate-800 block text-sm">
+                                    {{ $k->merk }} {{ $k->nama }}
+                                </span>
+                                <span class="font-mono bg-slate-100 text-slate-600 font-bold px-1.5 py-0.5 rounded text-[10px] inline-block mt-1 uppercase tracking-wider border border-slate-200/40">
+                                    {{ $k->plat_nomor }}
+                                </span>
                             </div>
                         </div>
                     </td>
+
                     {{-- Spesifikasi & Kategori --}}
                     <td class="py-3.5 px-5">
-                        <span class="font-semibold text-slate-700 block text-sm">{{ $k->kategori->nama ?? '—' }}</span>
-                        <span class="text-slate-400 text-xs block mt-0.5 capitalize font-medium">{{ $k->transmisi }} • {{ $k->bahan_bakar }}</span>
+                        <span class="font-semibold text-slate-700 block text-sm">
+                            {{ $k->kategori->nama ?? '—' }}
+                        </span>
+                        <span class="text-slate-400 text-xs block mt-0.5 capitalize font-medium">
+                            {{ $k->transmisi }} • {{ $k->bahan_bakar }}
+                        </span>
                     </td>
-                    {{-- Status Real-time Saat Ini --}}
+
+                    {{-- Status --}}
                     <td class="py-3.5 px-5 text-center">
                         <span class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider inline-block
-                            @if($k->status == 'tersedia') bg-green-50 text-green-700 border border-green-200 
-                            @elif($k->status == 'disewa') bg-blue-50 text-blue-700 border border-blue-200 
-                            @else bg-red-50 text-red-700 border border-red-200 @endif">
+                            @if($k->status == 'aktif')
+                                bg-green-50 text-green-700 border border-green-200
+                            @elseif($k->status == 'disewa')
+                                bg-blue-50 text-blue-700 border border-blue-200
+                            @else
+                                bg-red-50 text-red-700 border border-red-200
+                            @endif">
                             {{ $k->status }}
                         </span>
                     </td>
-                    {{-- Tarif Harian Kontrak --}}
+
+                    {{-- Tarif --}}
                     <td class="py-3.5 px-5 text-right font-semibold text-slate-700">
                         Rp {{ number_format($k->tarif_harian, 0, ',', '.') }}
                     </td>
-                    {{-- Total Berapa Kali Diorder Pada Periode Terpilih --}}
+
+                    {{-- Total Disewa --}}
                     <td class="py-3.5 px-5 text-center">
                         <span class="px-3 py-1 rounded-md font-bold bg-slate-50 text-slate-700 border border-slate-200/60 text-xs">
                             {{ $k->total_disewa }} Kali
                         </span>
                     </td>
-                    {{-- Total Pendapatan yang Berhasil Di-generate --}}
+
+                    {{-- Omset --}}
                     <td class="py-3.5 px-5 text-right font-mono font-extrabold text-blue-700 bg-blue-50/20 text-sm">
                         Rp {{ number_format($k->omset_kendaraan ?? 0, 0, ',', '.') }}
                     </td>
@@ -188,6 +207,8 @@
                 </tr>
                 @endforelse
             </tbody>
+
+
         </table>
     </div>
 </div>

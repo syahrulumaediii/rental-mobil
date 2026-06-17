@@ -7,17 +7,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use App\Models\Notifikasi;
+use Illuminate\Notifications\Notifiable; // <-- Tambahkan import ini
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory;
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+    use HasFactory, Notifiable; // <-- Tambahkan Notifiable di sini
+
     protected $fillable = [
         'name',
         'email',
@@ -27,21 +23,11 @@ class User extends Authenticatable
         'is_active',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -58,10 +44,23 @@ class User extends Authenticatable
         return $this->hasOne(Pelanggan::class);
     }
 
-    public function notifikasi(): HasMany
+    /**
+     * Jika Anda menggunakan sistem notifikasi bawaan Laravel,
+     * Anda bisa memanggil relasi ini untuk mengambil notifikasi di view pelanggan.
+     */
+    public function notifikasiKustom(): HasMany
     {
         return $this->hasMany(Notifikasi::class);
     }
+
+    public function notifikasi(): HasMany
+    {
+        // Pastikan nama Model Notifikasi Anda sesuai (misal: Notifikasi atau Notification)
+        // Dan pastikan foreign key di tabel notifikasi adalah 'user_id'
+        return $this->hasMany(Notifikasi::class, 'user_id');
+    }
+
+
 
     public function auditLogs(): HasMany
     {

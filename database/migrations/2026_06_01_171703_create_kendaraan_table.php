@@ -27,7 +27,8 @@ return new class extends Migration
             $table->enum('transmisi', ['manual', 'matic'])->default('manual');
             $table->enum('bahan_bakar', ['bensin', 'diesel', 'listrik'])->default('bensin');
             $table->decimal('tarif_harian', 12, 2)->default(0.00);
-            $table->enum('status', ['tersedia', 'disewa', 'servis', 'rusak'])->default('tersedia');
+            $table->decimal('denda_per_jam', 12, 2)->default(0.00);
+            $table->enum('status', ['aktif', 'non-aktif','disewa', 'servis'])->default('aktif');
             $table->string('foto', 255)->nullable();
             $table->text('deskripsi')->nullable();
             $table->index('kategori_id', 'idx_kendaraan_kategori');

@@ -22,7 +22,12 @@ class TransaksiSewaController extends Controller
         $query = TransaksiSewa::with(['booking.pelanggan.user', 'booking.kendaraan', 'kasir']);
 
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            if ($request->status === 'berjalan') {
+                // Jika diklik dari notif telat, tampilkan yang sedang berjalan (kasir bisa melihat mana yang lewat tanggal)
+                $query->where('status', 'berjalan');
+            } else {
+                $query->where('status', $request->status);
+            }
         }
 
         if ($request->filled('search')) {
@@ -52,7 +57,7 @@ class TransaksiSewaController extends Controller
     public function prosesSerahTerima(Request $request, Booking $booking)
     {
         $request->validate([
-            'tanggal_ambil_aktual' => 'required|date',
+            'tanggal_ambil_aktual' => 'required|date_format:d-m-Y H:i',
             'bahan_bakar_awal'     => 'required|string|max:50',
             'km_odometer_awal'     => 'required|integer|min:0',
             'foto_kondisi'         => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
@@ -63,14 +68,16 @@ class TransaksiSewaController extends Controller
             'catatan_kasir'        => 'nullable|string',
         ]);
 
+
         DB::transaction(function () use ($request, $booking) {
             $kodeTransaksi = 'TRX-' . strtoupper(Str::random(10));
+            $tanggalAktual = \Carbon\Carbon::createFromFormat('d-m-Y H:i', $request->tanggal_ambil_aktual)->format('Y-m-d H:i:s');
 
             $transaksi = TransaksiSewa::create([
                 'kode_transaksi'       => $kodeTransaksi,
                 'booking_id'           => $booking->id,
                 'kasir_id'             => Auth::id(),
-                'tanggal_ambil_aktual' => $request->tanggal_ambil_aktual,
+                'tanggal_ambil_aktual' => $tanggalAktual, // Tetap aman masuk ke database
                 'total_biaya'          => $booking->estimasi_biaya,
                 'total_denda'          => 0,
                 'total_bayar'          => $booking->estimasi_biaya,
@@ -115,7 +122,7 @@ class TransaksiSewaController extends Controller
             $booking->kendaraan->update(['status' => 'disewa']);
             $booking->update(['status' => 'aktif']);
         });
-        
+
 
         return redirect()->route('kasir.transaksi.index')
             ->with('success', 'Kendaraan berhasil diserahkan. Transaksi sewa dimulai.');
@@ -152,36 +159,39 @@ class TransaksiSewaController extends Controller
 
     public function prosesPengembalian(Request $request, TransaksiSewa $transaksi)
     {
-        // 1. Validasi Data Array 'dendas' hasil input dinamis (potongan_deposit dihapus)
+        // 1. Validasi Input
         $request->validate([
             'tanggal_kembali_aktual' => 'required|date',
             'bahan_bakar_akhir'      => 'required|string|max:50',
             'km_odometer_akhir'      => 'required|integer|min:0',
             'foto_kondisi_akhir'     => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'catatan_kondisi_akhir'  => 'nullable|string',
-            
-            // Aturan Validasi Array Denda Baru
+
             'dendas'                 => 'nullable|array',
             'dendas.*.jenis_denda'   => 'required|string',
             'dendas.*.total_denda'   => 'required|numeric|min:0',
-            'dendas.*.jumlah_hari_telat' => 'nullable|integer|min:0',
+            'dendas.*.jumlah_jam_telat' => 'nullable|integer|min:0',
             'dendas.*.tarif_denda'   => 'nullable|numeric|min:0',
             'dendas.*.keterangan'    => 'nullable|string',
-            
+
             'alasan_potongan'        => 'nullable|string',
             'metode_pembayaran_id'   => 'required_if:jumlah_bayar,>0|exists:metode_pembayaran,id',
             'jumlah_bayar'           => 'required|numeric|min:0',
         ]);
 
+        // 2. Transaksi Database
         DB::transaction(function () use ($request, $transaksi) {
             $totalDenda = 0;
 
-            // 2. Simpan Kondisi Fisik Mobil Saat Pengembalian
+            $tanggalKembali = \Carbon\Carbon::createFromFormat('d-m-Y H:i', $request->tanggal_kembali_aktual);
+
+            // Simpan Foto Kondisi
             $fotoPath = null;
             if ($request->hasFile('foto_kondisi_akhir')) {
                 $fotoPath = $request->file('foto_kondisi_akhir')->store('kondisi', 'public');
             }
 
+            // Simpan Data Kondisi Akhir
             KondisiKendaraan::create([
                 'transaksi_id'    => $transaksi->id,
                 'waktu'           => 'sesudah',
@@ -192,66 +202,57 @@ class TransaksiSewaController extends Controller
                 'dicatat_oleh'    => Auth::id(),
             ]);
 
-            // 3. Perulangan (Looping) Menyimpan Setiap Baris Denda dan Akumulasi Nominalnya
+            // Proses Denda
             if ($request->has('dendas') && is_array($request->dendas)) {
                 foreach ($request->dendas as $dendaItem) {
                     $itemTotal = floatval($dendaItem['total_denda'] ?? 0);
-                    
                     if ($itemTotal > 0) {
                         $totalDenda += $itemTotal;
-
                         Denda::create([
-                            'transaksi_id'     => $transaksi->id,
-                            'jenis_denda'      => $dendaItem['jenis_denda'],
-                            'keterangan'       => $dendaItem['keterangan'] ?? null,
-                            'jumlah_hari_telat' => $dendaItem['jumlah_hari_telat'] ?? 0,
-                            'tarif_denda'      => $dendaItem['tarif_denda'] ?? 0,
-                            'total_denda'      => $itemTotal,
+                            'transaksi_id'      => $transaksi->id,
+                            'jenis_denda'       => $dendaItem['jenis_denda'],
+                            'keterangan'        => $dendaItem['keterangan'] ?? null,
+                            'jumlah_jam_telat'  => $dendaItem['jumlah_jam_telat'] ?? 0,
+                            'tarif_denda'       => $dendaItem['tarif_denda'] ?? 0,
+                            'total_denda'       => $itemTotal,
                         ]);
                     }
                 }
             }
 
-            // 4. Kalkulasi Manajemen Pengurangan Uang Deposit Pelanggan Otomatis
+            // Kelola Deposit
             $deposit = $transaksi->deposit;
             $potonganDepositOtomatis = 0;
 
             if ($deposit) {
                 $jumlahDepositAwal = $deposit->jumlah;
-                
-                // Rumus Otomatis: memotong denda dari deposit sebatas dana deposit yang tersedia
                 $potonganDepositOtomatis = min($totalDenda, $jumlahDepositAwal);
-                
-                // Mengelola teks alasan/catatan manual dari kasir untuk riwayat audit database
-                $alasanKasir = $request->filled('alasan_potongan') 
-                    ? $request->alasan_potongan 
+
+                $alasanKasir = $request->filled('alasan_potongan')
+                    ? $request->alasan_potongan
                     : "Potongan denda pemakaian.";
 
-                $alasanFinal = $potonganDepositOtomatis > 0 
+                $alasanFinal = $potonganDepositOtomatis > 0
                     ? $alasanKasir . " (Terpotong denda otomatis: Rp " . number_format($potonganDepositOtomatis, 0, ',', '.') . ")"
                     : "Kembali penuh. Selesai tanpa denda.";
 
                 $statusBaruDeposit = $potonganDepositOtomatis >= $jumlahDepositAwal ? 'dipotong' : 'dikembalikan';
 
                 $deposit->update([
-                    'status'          => $statusBaruDeposit,
-                    'jumlah_dipotong' => $potonganDepositOtomatis,
-                    'alasan_potongan' => $alasanFinal,
-                    'dikembalikan_at' => now(),
+                    'status'           => $statusBaruDeposit,
+                    'jumlah_dipotong'  => $potonganDepositOtomatis,
+                    'alasan_potongan'  => $alasanFinal,
+                    'dikembalikan_at'  => now(),
                 ]);
             }
 
-            // 5. Rumus Neraca Keuangan Akhir
-            // Sisa total bersih transaksi memperhitungkan potongan denda otomatis lewat deposit
+            // Perhitungan Keuangan Akhir
             $totalSewaDanDendaBersih = ($transaksi->total_biaya + $totalDenda) - $potonganDepositOtomatis;
-            
             $yangSudahDibayar = $transaksi->pembayaran()->where('status', 'lunas')->sum('jumlah_bayar');
-            $sisaKekurangan    = max(0, $totalSewaDanDendaBersih - $yangSudahDibayar);
-
-            // Hitung kembalian kasir jika jumlah pembayaran melebihi sisa kekurangan tagihan
+            $sisaKekurangan = max(0, $totalSewaDanDendaBersih - $yangSudahDibayar);
             $kembalian = max(0, $request->jumlah_bayar - $sisaKekurangan);
 
-            // Catat transaksi pembayaran kasir jika ada sisa nominal denda yang dibayar di tempat
+            // Catat Pembayaran Jika ada pembayaran tambahan di tempat
             if ($request->jumlah_bayar > 0) {
                 Pembayaran::create([
                     'transaksi_id'         => $transaksi->id,
@@ -262,15 +263,15 @@ class TransaksiSewaController extends Controller
                 ]);
             }
 
-            // 6. Sinkronisasi Data Akhir ke Tabel Utama Induk Transaksi Sewa
+            // Update Transaksi
             $transaksi->update([
-                'tanggal_kembali_aktual' => $request->tanggal_kembali_aktual,
+                'tanggal_kembali_aktual' => $tanggalKembali->format('d-m-Y H:i:s'),
                 'total_denda'            => $totalDenda,
-                'total_bayar'            => max(0, $totalSewaDanDendaBersih), 
+                'total_bayar'            => max(0, $totalSewaDanDendaBersih),
                 'status'                 => 'selesai',
             ]);
 
-            // 7. Kembalikan Status Mobil ke Katalog Utama agar Tersedia
+            // Update Booking & Kendaraan
             $transaksi->booking->kendaraan->update(['status' => 'tersedia']);
             $transaksi->booking->update(['status' => 'selesai']);
         });
@@ -278,5 +279,4 @@ class TransaksiSewaController extends Controller
         return redirect()->route('kasir.transaksi.show', $transaksi)
             ->with('success', 'Pengembalian kendaraan berhasil diproses. Unit kembali tersedia.');
     }
-    
 }

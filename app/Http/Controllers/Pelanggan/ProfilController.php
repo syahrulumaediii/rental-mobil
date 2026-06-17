@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Pelanggan;
 
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -88,7 +89,7 @@ class ProfilController extends Controller
             'phone'         => 'required|string|max:20',
             'nik'           => 'required|string|size:16',
             'tempat_lahir'  => 'required|string|max:100',
-            'tanggal_lahir' => 'required|date',
+            'tanggal_lahir' => 'required|date_format:d-m-Y',
             'jenis_kelamin' => 'required|in:laki-laki,perempuan',
             'kota'          => 'required|string|max:100',
             'pekerjaan'     => 'nullable|string|max:100',
@@ -98,8 +99,20 @@ class ProfilController extends Controller
 
         // 2. Logika Unggah Foto Profil ke Storage
         $dataPelanggan = $request->only([
-            'nik', 'tempat_lahir', 'tanggal_lahir', 'jenis_kelamin', 'kota', 'pekerjaan', 'alamat'
+            'nik',
+            'tempat_lahir',
+            'tanggal_lahir',
+            'jenis_kelamin',
+            'kota',
+            'pekerjaan',
+            'alamat'
         ]);
+
+        // 2. Siapkan data, konversi tanggal lahir di sini
+        $dataPelanggan = $request->except(['tanggal_lahir', 'foto_profil']);
+
+        // Konversi string d-m-Y ke format database Y-m-d
+        $dataPelanggan['tanggal_lahir'] = Carbon::createFromFormat('d-m-Y', $request->tanggal_lahir)->format('Y-m-d');
 
         if ($request->hasFile('foto_profil')) {
             // Hapus berkas foto lama jika ada di dalam folder

@@ -22,6 +22,7 @@ class Kendaraan extends Model
         'transmisi',
         'bahan_bakar',
         'tarif_harian',
+        'denda_per_jam',
         'status',
         'foto',
         'deskripsi',
@@ -31,6 +32,7 @@ class Kendaraan extends Model
     {
         return [
             'tarif_harian' => 'decimal:2',
+            'denda_per_jam' => 'decimal:2',
             'kapasitas' => 'integer',
             'tahun' => 'integer',
         ];
@@ -49,7 +51,7 @@ class Kendaraan extends Model
         return $this->belongsTo(KategoriKendaraan::class, 'kategori_id');
     }
 
-    public function booking(): HasMany
+    public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
     }
@@ -58,6 +60,6 @@ class Kendaraan extends Model
 
     public function isTersedia(): bool
     {
-        return $this->status === 'tersedia';
+        return $this->status === 'aktif';
     }
 }

@@ -53,24 +53,32 @@
                 </div>
             </div>
 
-            {{-- Card Status Operasional & Harga --}}
+            {{-- Card Status Operasional & Tarif Keuangan --}}
             <div class="card p-4 space-y-4">
                 <div>
                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Status Fisik Saat Ini</label>
                     @php 
                         $statusClasses = [
-                            'tersedia' => 'bg-green-50 text-green-700 border-green-200',
-                            'disewa' => 'bg-blue-50 text-blue-700 border-blue-200',
-                            'perawatan' => 'bg-red-50 text-red-700 border-red-200'
+                            'tersedia'  => 'bg-green-50 text-green-700 border-green-200',
+                            'disewa'    => 'bg-blue-50 text-blue-700 border-blue-200',
+                            'perawatan' => 'bg-red-50 text-red-700 border-red-200',
+                            'rusak'     => 'bg-rose-100 text-rose-800 border-rose-300'
                         ];
                     @endphp
                     <span class="px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider border inline-block {{ $statusClasses[$kendaraan->status] ?? 'bg-slate-50 text-slate-700 border-slate-200' }}">
                         {{ $kendaraan->status }}
                     </span>
                 </div>
+                
                 <div>
                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">Tarif Sewa Harian</label>
                     <p class="text-2xl font-black text-blue-600 font-mono">Rp {{ number_format($kendaraan->tarif_harian, 0, ',', '.') }}<span class="text-xs text-slate-400 font-sans font-normal"> /hari</span></p>
+                </div>
+
+                {{-- 🌟 BARU: Menampilkan tarif denda keterlambatan per jam di card finansial kiri --}}
+                <div class="pt-3 border-t border-slate-100">
+                    <label class="text-[10px] font-bold text-amber-600 uppercase tracking-wider block mb-0.5">Denda Keterlambatan</label>
+                    <p class="text-lg font-bold text-amber-700 font-mono">Rp {{ number_format($kendaraan->denda_per_jam ?? 0, 0, ',', '.') }}<span class="text-xs text-slate-400 font-sans font-normal"> /jam</span></p>
                 </div>
             </div>
         </div>
@@ -119,6 +127,12 @@
                     <div class="flex justify-between sm:block border-b sm:border-b-0 border-slate-50 pb-2 sm:pb-0">
                         <span class="text-slate-400 font-medium sm:block text-xs sm:mb-1">Kapasitas Maksimal</span>
                         <span class="font-bold text-slate-700 block">{{ $kendaraan->kapasitas }} Penumpang</span>
+                    </div>
+
+                    {{-- 🌟 BARU: Menampilkan data denda keterlambatan per jam di grid spesifikasi kanan --}}
+                    <div class="flex justify-between sm:block border-b sm:border-b-0 border-slate-50 pb-2 sm:pb-0">
+                        <span class="text-slate-400 font-medium sm:block text-xs sm:mb-1">Aturan Overtime (Denda)</span>
+                        <span class="font-bold text-amber-700 block font-mono">Rp {{ number_format($kendaraan->denda_per_jam ?? 0, 0, ',', '.') }} / Jam</span>
                     </div>
                 </div>
 

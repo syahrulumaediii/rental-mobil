@@ -13,6 +13,7 @@ class Booking extends Model
     protected $fillable = [
         'kode_booking',
         'pelanggan_id',
+        'sumber_booking',   // penambahan
         'kendaraan_id',
         'tanggal_mulai',
         'tanggal_selesai',
@@ -21,8 +22,9 @@ class Booking extends Model
         'catatan',
         'status',
         'alasan_penolakan',
-        'dikonfirmasi_oleh',
-        'dikonfirmasi_at',
+        'disetujui_oleh',
+        'disetujui_at',
+        'dibuat_oleh',
     ];
 
     protected function casts(): array
@@ -30,10 +32,22 @@ class Booking extends Model
         return [
             'tanggal_mulai' => 'datetime',
             'tanggal_selesai' => 'datetime',
-            'dikonfirmasi_at' => 'datetime',
+            'disetujui_at' => 'datetime',
             'estimasi_biaya' => 'decimal:2',
             'durasi_hari' => 'integer',
         ];
+    }
+
+
+    // Format tanggal Indonesia
+    public function getTanggalMulaiIndoAttribute()
+    {
+        return \Carbon\Carbon::parse($this->tanggal_mulai)->translatedFormat('d F Y');
+    }
+
+    public function getTanggalSelesaiIndoAttribute()
+    {
+        return \Carbon\Carbon::parse($this->tanggal_selesai)->translatedFormat('d F Y');
     }
 
     // ==================== RELASI ====================
@@ -48,9 +62,14 @@ class Booking extends Model
         return $this->belongsTo(Kendaraan::class);
     }
 
-    public function konfirmator(): BelongsTo
+    public function disetujuiOleh(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'dikonfirmasi_oleh');
+        return $this->belongsTo(User::class, 'disetujui_oleh');
+    }
+
+    public function dibuatOleh(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'dibuat_oleh');
     }
 
     public function transaksiSewa(): HasOne

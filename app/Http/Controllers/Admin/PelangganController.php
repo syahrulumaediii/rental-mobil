@@ -53,10 +53,9 @@ class PelangganController extends Controller
             'verified_at' => now(),
         ]);
 
+        // Ambil data pelanggan beserta relasi user-nya
+        $pelanggan = Pelanggan::with(['dokumen', 'user'])->find($dokumen->pelanggan_id);
 
-        // Jika semua dokumen wajib sudah verified, update status pelanggan
-        $pelanggan = Pelanggan::with('dokumen')
-            ->find($dokumen->pelanggan_id);
         $semuaVerified = $pelanggan->dokumen()
             ->whereIn('jenis_dokumen', ['ktp', 'sim'])
             ->where('status', 'verified')
@@ -64,16 +63,64 @@ class PelangganController extends Controller
 
         if ($semuaVerified) {
             $pelanggan->update(['status_verifikasi' => 'verified']);
-            $pelanggan->refresh();
+            $pelanggan->refresh(); // Refresh agar status terbaru masuk ke memori
+        } else {
+            if ($request->status === 'rejected') {
+                $pelanggan->update(['status_verifikasi' => 'rejected']);
+                $pelanggan->refresh();
+            }
         }
 
-        // dd(
-        //     $dokumen->pelanggan_id,
-        //     $pelanggan->status_verifikasi,
-        //     $pelanggan->dokumen()->get()
-        // );
+        // ==================== OTOMATIS KIRIM NOTIFIKASI BAGUS ====================
+        // ==================== OTOMATIS KIRIM NOTIFIKASI EKSKLUSIF ====================
+        if ($pelanggan && $pelanggan->user) {
+            $jenisDokumen = strtoupper($dokumen->jenis_dokumen);
+            $namaPelanggan = $pelanggan->user->name;
 
-        return back()->with('success', 'Dokumen berhasil diperbarui.');
+            // Inisialisasi variabel agar tidak kosong
+            $judul = null;
+            $pesan = null;
+
+            // LOGIKA 1: JIKA AKUN SELESAI DIVERIFIKASI (KTP & SIM APPROVED)
+            if ($pelanggan->status_verifikasi === 'verified') {
+                $judul = "🎉 Aktivasi Akun Berhasil - Selamat Bergabung!";
+                $pesan = "Halo {$namaPelanggan},\n\n" .
+                    "Kabar gembira! Tim verifikator kami telah selesai memeriksa seluruh dokumen wajib Anda. " .
+                    "Dengan ini, akun Anda dinyatakan VALID dan telah **Aktif Sepenuhnya**.\n\n" .
+                    "Sekarang Anda memiliki akses penuh untuk melakukan pemesanan (booking) armada kendaraan " .
+                    "terbaik kami kapan saja. Terima kasih telah memercayakan perjalanan Anda bersama kami. " .
+                    "Semoga hari Anda menyenangkan dan selamat berkendara dengan aman!";
+
+                // LOGIKA 2: JIKA ADA DOKUMEN YANG DITOLAK (PERLU PERBAIKAN)
+            } elseif ($dokumen->status === 'rejected') {
+                $judul = "❌ Tindakan Diperlukan: Verifikasi Dokumen {$jenisDokumen} Ditolak";
+                $alasan = $request->catatan ? $request->catatan : "Kualitas foto kurang jelas, blur, atau dokumen sudah kedaluwarsa.";
+
+                $pesan = "Halo {$namaPelanggan},\n\n" .
+                    "Terima kasih telah melakukan unggah dokumen. Mohon maaf, setelah dilakukan pemeriksaan, " .
+                    "dokumen **{$jenisDokumen}** Anda belum dapat kami setujui dengan alasan:\n" .
+                    "\"{$alasan}\"\n\n" .
+                    "Mohon kesediaannya untuk mengunggah kembali foto dokumen {$jenisDokumen} Anda yang terbaru, " .
+                    "asli, dan terlihat jelas tanpa terpotong melalui halaman Profil Akun Anda. " .
+                    "Proses verifikasi akan langsung kami lanjutkan setelah dokumen perbaikan kami terima. Terima kasih.";
+            }
+
+            // KONTROL: Hanya simpan ke database jika salah satu kondisi di atas terpenuhi
+            if ($judul && $pesan) {
+                $pelanggan->user->notifikasi()->create([
+                    'user_id'    => $pelanggan->user_id,
+                    'judul'      => $judul,
+                    'pesan'      => $pesan,
+                    'tipe'       => 'dokumen', // Sesuai dengan batasan enum di database Anda
+                    'url'        => route('admin.pelanggan.show', $pelanggan->id), // Sesuaikan ke arah halaman profil user jika diperlukan
+                    'read_at'    => null,
+                ]);
+            }
+        }
+        // =========================================================================
+        // =========================================================================
+
+        return back()->with('success', 'Dokumen berhasil diperbarui dan notifikasi telah dikirim ke pelanggan.');
     }
 
     // ===================== BLACKLIST =====================

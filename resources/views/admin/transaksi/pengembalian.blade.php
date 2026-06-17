@@ -8,8 +8,15 @@
     @include('components.sidebar-admin')
 @endsection
 
-@section('content')
 
+@section('content')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+    /* Paksa sembunyikan AM/PM di kalender */
+    .flatpickr-am-pm {
+        display: none !important;
+    }
+</style>
 @vite('resources/js/transaksi/pengembalian.js')
 
 <div class="max-w-3xl mx-auto space-y-5">
@@ -18,10 +25,21 @@
         $pembayaranSewa = $transaksi->pembayaran->where('status', 'lunas')->sortBy('created_at')->first();
         $sewaSudahLunas = $pembayaranSewa !== null;
         $jumlahDeposit  = $transaksi->deposit?->jumlah ?? 0;
-        $batasKembali   = $transaksi->booking->tanggal_selesai;
+        
+        // Pastikan batas kembali adalah objek Carbon
+        $batasKembali   = \Carbon\Carbon::parse($transaksi->booking->tanggal_selesai);
+        
+        // Jika jam masih 00:00 (karena database hanya menyimpan tanggal), 
+        // kita set ke akhir hari agar perhitungan lebih adil bagi pelanggan
+        if ($batasKembali->format('H:i') == '00:00') {
+            $batasKembali = $batasKembali->endOfDay();
+        }
+        
         $sekarang       = now();
         $telat          = $sekarang->gt($batasKembali);
-        $hariTelat      = $telat ? (int) $sekarang->diffInDays($batasKembali) : 0;
+        
+        // Mendefinisikan $diff untuk digunakan di HTML
+        $diff = $telat ? $sekarang->diff($batasKembali) : null;
     @endphp
 
     {{-- INFO TRANSAKSI --}}
@@ -40,16 +58,17 @@
             </div>
             <div>
                 <p class="text-slate-400 text-xs">Batas Waktu Pengembalian Resmi</p>
-                <p class="font-semibold text-slate-700 mt-0.5">{{ $batasKembali?->format('d M Y, H:i') }} WIB</p>
+                <p class="font-semibold text-slate-700 mt-0.5">{{ $batasKembali?->format('d M Y H:i') }} WIB</p>
             </div>
             <div>
                 <p class="text-slate-400 text-xs">Status Keterlambatan Sistem</p>
-                @if($telat)
-                <p class="font-bold text-red-600 mt-0.5 flex items-center gap-1">
-                    <i data-lucide="clock" class="w-4 h-4"></i> Terlambat ± {{ $hariTelat }} Hari
-                </p>
+                @if($telat && $diff)
+                    <p class="font-bold text-red-600 mt-0.5 flex items-center gap-1">
+                        <i data-lucide="clock" class="w-4 h-4"></i> 
+                        Terlambat {{ $diff->d }} Hari, {{ $diff->h }} Jam, {{ $diff->i }} Menit
+                    </p>
                 @else
-                <p class="font-bold text-emerald-600 mt-0.5">Aman (Tepat Waktu)</p>
+                    <p class="font-bold text-emerald-600 mt-0.5">Aman (Tepat Waktu)</p>
                 @endif
             </div>
         </div>
@@ -66,7 +85,14 @@
             <div class="grid md:grid-cols-2 gap-4">
                 <div>
                     <label class="form-label">Tanggal Kembali Aktual</label>
-                    <input type="datetime-local" name="tanggal_kembali_aktual" value="{{ now()->format('Y-m-d\TH:i') }}" class="form-input">
+                    <input 
+                        type="datetime-local" 
+                        name="tanggal_kembali_aktual" 
+                        id="tanggal_kembali_aktual"
+                        value="{{ old('tanggal_kembali_aktual', now()->format('Y-m-d\TH:i')) }}" 
+                        class="form-input"
+                        required
+                    >
                 </div>
                 <div>
                     <label class="form-label">Bahan Bakar Akhir</label>
@@ -165,4 +191,33 @@
         </div>
     </form>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const input = document.getElementById('tanggal_kembali_aktual');
+        
+        // Memastikan nilai default saat halaman dimuat sudah dalam format yang benar
+        // Menggunakan toLocaleString dengan opsi hour12: false
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        
+        input.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+    });
+
+    flatpickr("#tanggal_kembali_aktual", {
+    enableTime: true,
+    dateFormat: "Y-m-d H:i", // Format simpan ke DB
+    time_24hr: true,         // <--- INI WAJIB AGAR AM/PM HILANG
+    locale: "id",
+    altInput: true,          // Menampilkan teks yang bisa dibaca manusia
+    altFormat: "d F Y, H:i", // Format tampilan (H:i adalah 24 jam)
+});
+</script>
 @endsection
