@@ -116,7 +116,7 @@
         </div>
         <div class="self-start sm:self-center">
             <span class="text-[11px] font-bold px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600 border border-blue-100 block sm:inline text-center">
-                Periode: {{ \Carbon\Carbon::parse($dari)->format('d M Y') }} - {{ \Carbon\Carbon::parse($sampai)->format('d M Y') }}
+                Periode: @indo_date($dari) - @indo_date($sampai)
             </span>
         </div>
     </div>
@@ -142,7 +142,7 @@
                     {{-- Kode Ref --}}
                     <td class="py-3.5 px-5 font-mono font-bold text-blue-600">
                         {{ $t->kode_transaksi }}
-                        <span class="block text-[10px] text-slate-400 font-normal mt-0.5 tracking-tight">{{ $t->created_at->format('d/m/Y H:i') }}</span>
+                        <span class="block text-[10px] text-slate-400 font-normal mt-0.5 tracking-tight">@indo_datetime($t->created_at)</span>
                     </td>
                     {{-- Pelanggan / Kendaraan --}}
                     <td class="py-3.5 px-5">

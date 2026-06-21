@@ -81,9 +81,8 @@ Dilakukan saat barang dikembalikan[cite: 1, 2].
 | Skenario                     | Input Sistem                | Hasil Perhitungan | Tindakan                  |
 | :--------------------------- | :-------------------------- | :---------------- | :------------------------ |
 | **Booking**                  | Total: Rp 100rb             | DP: Rp 30rb       | Bayar DP                  |
-| **Serah Terima**             | Sisa: Rp 70rb, Deposit jika 
-                                        ada (Uang Jaminan) | -                 | Bayar Pelunasan + Deposit |
-| **Pengembalian (Terlambat)** | ambil dari tabel kendaraan kolom denda per jam (Denda/Jam) | Denda contoh: 2 jam x Rp 100rb = Rp 200rb    | Kurangi Deposit Rp 200rb   |
+| **Serah Terima**             | Sisa: Rp 70rb, Dep: Rp 50rb | -                 | Bayar Pelunasan + Deposit |
+| **Pengembalian (Terlambat)** | 2 Jam x Rp 10rb (Denda/Jam) | Denda: Rp 20rb    | Kurangi Deposit Rp 20rb   |
 | **Pengembalian (Normal)**    | Denda: Rp 0                 | Deposit: Rp 50rb  | Kembalikan Rp 50rb        |
 
 ---

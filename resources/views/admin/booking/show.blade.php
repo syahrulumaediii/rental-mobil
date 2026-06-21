@@ -52,14 +52,14 @@
                     <p class="text-xs text-slate-400">Tanggal Mulai Sewa</p>
                     <p class="font-semibold text-slate-700 text-sm flex items-center gap-2 mt-1">
                         <i data-lucide="calendar" class="w-4 h-4 text-slate-400 shrink-0"></i>
-                        {{ $booking->tanggal_mulai->format('d M Y') }}
+                        @indo_datetime($booking->tanggal_mulai)
                     </p>
                 </div>
                 <div>
                     <p class="text-xs text-slate-400">Tanggal Selesai Sewa</p>
                     <p class="font-semibold text-slate-700 text-sm flex items-center gap-2 mt-1">
                         <i data-lucide="calendar-check" class="w-4 h-4 text-slate-400 shrink-0"></i>
-                        {{ $booking->tanggal_selesai->format('d M Y') }}
+                        @indo_datetime($booking->tanggal_selesai)
                     </p>
                 </div>
                 <div>
@@ -68,8 +68,23 @@
                 </div>
                 <div>
                     <p class="text-xs text-slate-400">Tanggal Pengajuan</p>
-                    <p class="font-medium text-slate-600 text-xs sm:text-sm mt-1">{{ $booking->created_at->format('d M Y · H:i') }}</p>
+                    <p class="font-medium text-slate-600 text-xs sm:text-sm mt-1">@indo_datetime($booking->created_at)</p>
                 </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6 pt-6 border-t border-slate-100">
+                <div>
+                    <p class="text-xs text-slate-400 mb-2">Sumber Booking</p>
+                    <span class="badge {{ $booking->sumber_booking === 'online' ? 'badge-blue' : 'badge-purple' }} text-[10px] uppercase">
+                        {{ $booking->sumber_booking }}
+                    </span>
+                </div>
+                @if($booking->dibuatOleh)
+                <div>
+                    <p class="text-xs text-slate-400">Dibuat Oleh</p>
+                    <p class="text-sm font-medium text-slate-700">{{ $booking->dibuatOleh->name }}</p>
+                </div>
+                @endif
             </div>
 
             @if($booking->catatan)
@@ -102,9 +117,13 @@
                         <p class="text-xs text-slate-400">Plat Nomor</p>
                         <p class="font-mono text-xs font-bold text-slate-700 bg-slate-100 px-2 py-1 rounded inline-block mt-0.5 tracking-wider">{{ $booking->kendaraan->plat_nomor }}</p>
                     </div>
-                    <div class="sm:col-span-2">
+                    <div>
                         <p class="text-xs text-slate-400">Tarif Harian</p>
                         <p class="text-sm font-bold text-slate-700 mt-0.5">Rp {{ number_format($booking->kendaraan->tarif_harian, 0, ',', '.') }} <span class="text-xs text-slate-400 font-normal">/ hari</span></p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-amber-600 font-semibold">Denda Terlambat</p>
+                        <p class="text-sm font-bold text-amber-700 mt-0.5">Rp {{ number_format($booking->kendaraan->denda_per_jam ?? 0, 0, ',', '.') }} <span class="text-xs font-normal text-amber-600">/ jam</span></p>
                     </div>
                 </div>
             </div>
@@ -134,11 +153,43 @@
         </div>
 
         {{-- Card Total Invoice Bayar --}}
-        <div class="card p-4 sm:p-5 bg-slate-50 border border-slate-100">
-            <div class="flex justify-between items-center text-xs sm:text-sm">
+        <div class="card p-4 sm:p-5 bg-slate-50 border border-slate-100 space-y-2.5">
+            <div class="flex justify-between text-xs sm:text-sm">
                 <span class="text-slate-600 font-medium">Total Sewa Pokok:</span>
-                <span class="font-extrabold text-slate-800 text-base sm:text-lg">Rp {{ number_format($booking->estimasi_biaya, 0, ',', '.') }}</span>
+                <span class="font-bold text-slate-800">Rp {{ number_format($booking->estimasi_biaya, 0, ',', '.') }}</span>
             </div>
+            <div class="flex justify-between text-xs text-amber-700 pt-1 border-t border-slate-200/50">
+                <span>Down Payment (DP 30%):</span>
+                <span class="font-bold">Rp {{ number_format($booking->estimasi_biaya * 0.3, 0, ',', '.') }}</span>
+            </div>
+            <div class="flex justify-between text-xs text-slate-600">
+                <span>Sisa Tagihan (70%):</span>
+                <span class="font-semibold">Rp {{ number_format($booking->estimasi_biaya * 0.7, 0, ',', '.') }}</span>
+            </div>
+            
+            @php
+                $depositNominal = 0;
+                $hasDeposit = false;
+                
+                if ($booking->is_deposit && $booking->deposit > 0) {
+                    $depositNominal = $booking->deposit;
+                    $hasDeposit = true;
+                } elseif ($booking->transaksiSewa && $booking->transaksiSewa->deposit) {
+                    $depositNominal = $booking->transaksiSewa->deposit->jumlah;
+                    $hasDeposit = true;
+                }
+            @endphp
+
+            @if($hasDeposit && $depositNominal > 0)
+                <div class="flex justify-between text-xs text-purple-700 pt-1 border-t border-slate-200/50">
+                    <span class="flex items-center gap-1"><i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Jaminan Deposit:</span>
+                    <span class="font-bold">Rp {{ number_format($depositNominal, 0, ',', '.') }}</span>
+                </div>
+                <div class="flex justify-between items-center text-xs sm:text-sm pt-2 border-t border-slate-200">
+                    <span class="text-slate-800 font-bold">Total Pembayaran + Deposit:</span>
+                    <span class="font-extrabold text-primary-700 text-base sm:text-lg">Rp {{ number_format($booking->estimasi_biaya + $depositNominal, 0, ',', '.') }}</span>
+                </div>
+            @endif
         </div>
 
         {{-- AREA VALIDASI PERSETUJUAN ADMIN (Hanya muncul jika status pending) --}}

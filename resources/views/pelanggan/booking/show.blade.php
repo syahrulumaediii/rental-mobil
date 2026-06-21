@@ -180,8 +180,16 @@
                     <span>Rp {{ number_format($booking->kendaraan->tarif_harian, 0, ',', '.') }} / hari</span>
                 </div>
                 <div class="flex justify-between text-slate-500">
-                    <span>Total Subtotal ({{ $booking->durasi_hari }} Hari)</span>
-                    <span class="font-medium text-slate-700">Rp {{ number_format($booking->estimasi_biaya, 0, ',', '.') }}</span>
+                    <span>Total Biaya Sewa ({{ $booking->durasi_hari }} Hari)</span>
+                    <span class="font-semibold text-slate-700">Rp {{ number_format($booking->estimasi_biaya, 0, ',', '.') }}</span>
+                </div>
+                <div class="flex justify-between text-slate-500 border-t border-dashed border-slate-100 pt-2">
+                    <span class="font-medium text-amber-700">DP (Down Payment 30%)</span>
+                    <span class="font-bold text-amber-700">Rp {{ number_format($booking->estimasi_biaya * 0.3, 0, ',', '.') }}</span>
+                </div>
+                <div class="flex justify-between text-slate-500">
+                    <span>Sisa Tagihan (70%)</span>
+                    <span class="font-medium text-slate-700">Rp {{ number_format($booking->estimasi_biaya * 0.7, 0, ',', '.') }}</span>
                 </div>
                 
                 {{-- Data akumulasi jika transaksi sewa sudah terbuat --}}

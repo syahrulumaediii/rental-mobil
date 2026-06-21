@@ -89,5 +89,14 @@ class AppServiceProvider extends ServiceProvider
                 'totalNotif'   => $bookingCount + $telatCount
             ]);
         });
+
+        // 3. Blade Directives for Indonesian formatting
+        \Illuminate\Support\Facades\Blade::directive('indo_datetime', function ($expression) {
+            return "<?php echo $expression ? \Carbon\Carbon::parse($expression)->locale('id')->translatedFormat('l, d F Y H:i') : '-'; ?>";
+        });
+
+        \Illuminate\Support\Facades\Blade::directive('indo_date', function ($expression) {
+            return "<?php echo $expression ? \Carbon\Carbon::parse($expression)->locale('id')->translatedFormat('d F Y') : '-'; ?>";
+        });
     }
 }

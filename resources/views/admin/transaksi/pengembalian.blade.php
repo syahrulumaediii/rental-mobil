@@ -58,7 +58,7 @@
             </div>
             <div>
                 <p class="text-slate-400 text-xs">Batas Waktu Pengembalian Resmi</p>
-                <p class="font-semibold text-slate-700 mt-0.5">{{ $batasKembali?->format('d M Y H:i') }} WIB</p>
+                <p class="font-semibold text-slate-700 mt-0.5">@indo_datetime($batasKembali) WIB</p>
             </div>
             <div>
                 <p class="text-slate-400 text-xs">Status Keterlambatan Sistem</p>

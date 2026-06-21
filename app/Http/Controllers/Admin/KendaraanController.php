@@ -58,7 +58,7 @@ class KendaraanController extends Controller
             'transmisi'    => ['required', Rule::in(['manual', 'otomatis'])],
             'bahan_bakar'  => ['required', Rule::in(['bensin', 'solar', 'listrik', 'hybrid'])],
             'tarif_harian' => 'required|numeric|min:0',
-            'status'       => ['required', Rule::in(['aktif','non-aktif', 'disewa', 'servis'])],
+            'status'       => ['required', Rule::in(['aktif', 'non-aktif', 'disewa', 'servis'])],
             'foto'         => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'deskripsi'    => 'nullable|string',
         ]);
@@ -103,7 +103,7 @@ class KendaraanController extends Controller
             'transmisi'    => ['required', Rule::in(['manual', 'otomatis'])],
             'bahan_bakar'  => ['required', Rule::in(['bensin', 'solar', 'listrik', 'hybrid'])],
             'tarif_harian' => 'required|numeric|min:0',
-            'status'       => ['required', Rule::in(['aktif', 'non-aktif','disewa', 'servis'])],
+            'status'       => ['required', Rule::in(['aktif', 'non-aktif', 'disewa', 'servis'])],
             'foto'         => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'deskripsi'    => 'nullable|string',
         ]);

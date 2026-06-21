@@ -59,14 +59,15 @@
                     <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Status Fisik Saat Ini</label>
                     @php 
                         $statusClasses = [
-                            'tersedia'  => 'bg-green-50 text-green-700 border-green-200',
+                            'aktif'     => 'bg-green-50 text-green-700 border-green-200',
                             'disewa'    => 'bg-blue-50 text-blue-700 border-blue-200',
-                            'perawatan' => 'bg-red-50 text-red-700 border-red-200',
-                            'rusak'     => 'bg-rose-100 text-rose-800 border-rose-300'
+                            'servis'    => 'bg-amber-50 text-amber-700 border-amber-200',
+                            'rusak'     => 'bg-rose-100 text-rose-800 border-rose-300',
+                            'non-aktif' => 'bg-slate-50 text-slate-700 border-slate-200'
                         ];
                     @endphp
                     <span class="px-3 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider border inline-block {{ $statusClasses[$kendaraan->status] ?? 'bg-slate-50 text-slate-700 border-slate-200' }}">
-                        {{ $kendaraan->status }}
+                        {{ $kendaraan->status == 'aktif' ? 'Tersedia' : ($kendaraan->status == 'servis' ? 'Service' : $kendaraan->status) }}
                     </span>
                 </div>
                 
@@ -94,7 +95,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6 text-sm">
                     <div class="flex justify-between sm:block border-b sm:border-b-0 border-slate-50 pb-2 sm:pb-0">
                         <span class="text-slate-400 font-medium sm:block text-xs sm:mb-1">Kategori Fleet</span>
-                        <span class="font-semibold text-slate-800 bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-xs inline-block sm:mt-0.5">
+                        <span class="font-semibold text-slate-800 bg-blue-50 px-2 py-0.5 rounded text-xs inline-block sm:mt-0.5">
                             {{ $kendaraan->kategori->nama ?? 'Tanpa Kategori' }}
                         </span>
                     </div>

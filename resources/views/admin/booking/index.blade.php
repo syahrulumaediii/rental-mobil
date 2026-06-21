@@ -9,6 +9,22 @@
 @endsection
 
 @section('content')
+
+{{-- BANNER NOTIFIKASI --}}
+@if(isset($pendingCount) && $pendingCount > 0)
+<div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-5 flex items-center justify-between shadow-sm">
+    <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center text-amber-600">
+            <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+        </div>
+        <div>
+            <h4 class="font-bold text-amber-900">Perhatian: Ada Booking Baru!</h4>
+            <p class="text-sm text-amber-700">Terdapat <strong>{{ $pendingCount }} booking</strong> yang menunggu konfirmasi Anda.</p>
+        </div>
+    </div>
+</div>
+@endif
+
 {{-- Card Filter --}}
 <div class="card p-4 sm:p-5 mb-5">
     <form method="GET" class="flex flex-col md:flex-row md:items-end gap-4">
@@ -51,6 +67,7 @@
                     <th class="px-5 py-3.5">Kendaraan</th>
                     <th class="px-5 py-3.5">Periode</th>
                     <th class="px-5 py-3.5">Estimasi Biaya</th>
+                    <th class="px-5 py-3.5">Sumber</th>
                     <th class="px-5 py-3.5">Status</th>
                     <th class="px-5 py-3.5 text-right">Aksi</th>
                 </tr>
@@ -74,12 +91,24 @@
                     </td>
                     {{-- Periode --}}
                     <td class="px-5 py-3.5">
-                        <p class="font-semibold text-xs text-blue-600">{{ $b->tanggal_mulai->format('d M Y') }}</p>
-                        <p class="text-xs text-slate-400 mt-0.5">s/d {{ $b->tanggal_selesai->format('d M Y') }} · <span class="font-medium text-slate-600">{{ $b->durasi_hari }} hari</span></p>
+                        <p class="font-semibold text-xs text-blue-600">@indo_datetime($b->tanggal_mulai)</p>
+                        <p class="text-xs text-slate-400 mt-0.5">s/d @indo_datetime($b->tanggal_selesai) · <span class="font-medium text-slate-600">{{ $b->durasi_hari }} hari</span></p>
                     </td>
                     {{-- Biaya --}}
                     <td class="px-5 py-3.5 font-bold text-slate-700">
                         Rp {{ number_format($b->estimasi_biaya, 0, ',', '.') }}
+                    </td>
+                    {{-- Sumber --}}
+                    <td class="px-5 py-3.5">
+                        <span class="badge {{ $b->sumber_booking === 'online' ? 'badge-blue' : 'badge-purple' }} text-[10px] px-2 py-1">
+                            {{ strtoupper($b->sumber_booking) }}
+                        </span>
+                        
+                        @if($b->dibuatOleh)
+                            <p class="text-[10px] text-slate-400 mt-1 truncate max-w-25" title="Dibuat oleh: {{ $b->dibuatOleh->name }}">
+                                Oleh: {{ explode(' ', $b->dibuatOleh->name)[0] }}
+                            </p>
+                        @endif
                     </td>
                     {{-- Status --}}
                     <td class="px-5 py-3.5">
@@ -117,7 +146,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="text-center py-12 text-slate-400 font-medium text-xs">
+                    <td colspan="8" class="text-center py-12 text-slate-400 font-medium text-xs">
                         <i data-lucide="folder-open" class="w-6 h-6 mx-auto mb-2 text-slate-300"></i>
                         Tidak ada data booking ditemukan
                     </td>

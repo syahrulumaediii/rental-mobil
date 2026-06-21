@@ -19,7 +19,7 @@
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-5">
                 <div>
                     <p class="font-mono text-lg font-extrabold text-slate-800">{{ $transaksi->kode_transaksi }}</p>
-                    <p class="text-sm text-slate-400">Dibuat {{ $transaksi->created_at->format('d M Y, H:i') }} WIB</p>
+                    <p class="text-sm text-slate-400">Dibuat @indo_datetime($transaksi->created_at) WIB</p>
                 </div>
                 @php $sc = ['berjalan' => 'badge-blue', 'selesai' => 'badge-green', 'dibatalkan' => 'badge-red']; @endphp
                 <span class="badge {{ $sc[$transaksi->status] ?? 'badge-gray' }} text-sm px-4 py-1.5">{{ ucfirst($transaksi->status) }}</span>
@@ -29,8 +29,8 @@
                     ['Pelanggan',          $transaksi->booking->pelanggan->user->name ?? '-'],
                     ['Kasir PJ Lapangan',  $transaksi->kasir->name ?? 'Sistem'],
                     ['Kendaraan / Plat',   ($transaksi->booking->kendaraan->nama ?? '-').' / '.($transaksi->booking->kendaraan->plat_nomor ?? '-')],
-                    ['Tanggal Ambil',      $transaksi->tanggal_ambil_aktual ? \Carbon\Carbon::parse($transaksi->tanggal_ambil_aktual)->format('d M Y') : '-'],
-                    ['Tanggal Kembali',    $transaksi->tanggal_kembali_aktual ? \Carbon\Carbon::parse($transaksi->tanggal_kembali_aktual)->format('d M Y') : 'Belum Dikembalikan'],
+                    ['Tanggal Ambil',      $transaksi->tanggal_ambil_aktual ? \Carbon\Carbon::parse($transaksi->tanggal_ambil_aktual)->locale('id')->translatedFormat('l, d F Y H:i') : '-'],
+                    ['Tanggal Kembali',    $transaksi->tanggal_kembali_aktual ? \Carbon\Carbon::parse($transaksi->tanggal_kembali_aktual)->locale('id')->translatedFormat('l, d F Y H:i') : 'Belum Dikembalikan'],
                 ] as $info)
                 <div>
                     <p class="text-slate-400 text-xs">{{ $info[0] }}</p>
@@ -118,7 +118,7 @@
                 <div class="flex items-center justify-between gap-2 border-b border-slate-100 pb-2 last:border-0 last:pb-0">
                     <div class="min-w-0">
                         <p class="text-sm font-semibold text-slate-700 truncate">Rp {{ number_format($p->jumlah_bayar, 0, ',', '.') }}</p>
-                        <p class="text-xs text-slate-400 truncate">{{ $p->metodePembayaran->nama ?? 'Cash' }} &bull; {{ $p->created_at->format('d/m/H:i') }}</p>
+                        <p class="text-xs text-slate-400 truncate">{{ $p->metodePembayaran->nama ?? 'Cash' }} &bull; @indo_datetime($p->created_at)</p>
                     </div>
                     <span class="badge {{ $p->status === 'lunas' || $p->status === 'berhasil' ? 'badge-green' : 'badge-gray' }} text-[10px] shrink-0">
                         {{ strtoupper($p->status) }}

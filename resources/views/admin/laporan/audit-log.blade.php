@@ -55,7 +55,7 @@
                 @forelse($logs as $log)
                 <tr class="hover:bg-slate-50/40 transition valign-top">
                     <td class="py-3 px-4 text-slate-500 whitespace-nowrap">
-                        {{ $log->created_at ? $log->created_at->format('d M Y H:i:s') : '-' }}
+                        @indo_datetime($log->created_at)
                     </td>
                     <td class="py-3 px-4">
                         <span class="font-semibold text-slate-800 block">{{ $log->user->name ?? 'System/Visitor' }}</span>

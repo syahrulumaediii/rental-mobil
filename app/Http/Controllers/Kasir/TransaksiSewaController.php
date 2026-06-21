@@ -272,7 +272,7 @@ class TransaksiSewaController extends Controller
             ]);
 
             // Update Booking & Kendaraan
-            $transaksi->booking->kendaraan->update(['status' => 'tersedia']);
+            $transaksi->booking->kendaraan->update(['status' => 'aktif']);
             $transaksi->booking->update(['status' => 'selesai']);
         });
 

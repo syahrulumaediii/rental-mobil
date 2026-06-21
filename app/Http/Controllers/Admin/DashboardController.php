@@ -21,7 +21,7 @@ class DashboardController extends Controller
             'booking_pending'     => Booking::where('status', 'pending')->count(),
             'transaksi_aktif'     => TransaksiSewa::where('status', 'berjalan')->count(),
             'total_pendapatan'    => TransaksiSewa::where('status', 'selesai')->sum('total_bayar'),
-            
+
             // 🔥 TAMBAHAN: Menghitung jumlah booking yang siap diambil (status disetujui)
             'booking_siap_ambil'  => Booking::where('status', 'disetujui')->count(),
         ];
@@ -45,9 +45,9 @@ class DashboardController extends Controller
 
         // Jangan lupa masukkan 'booking_siap_ambil' ke dalam fungsi compact()
         return view('admin.dashboard.index', compact(
-            'stats', 
-            'booking_terbaru', 
-            'transaksi_terbaru', 
+            'stats',
+            'booking_terbaru',
+            'transaksi_terbaru',
             'booking_siap_ambil'
         ));
     }

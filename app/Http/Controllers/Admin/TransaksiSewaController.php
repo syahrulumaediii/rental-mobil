@@ -71,7 +71,7 @@ class TransaksiSewaController extends Controller
     public function prosesSerahTerima(Request $request, Booking $booking)
     {
         $request->validate([
-            'tanggal_ambil_aktual' => 'required|date',
+            'tanggal_ambil_aktual' => 'required|date_format:d-m-Y H:i',
             'bahan_bakar_awal'     => 'required|string|max:50',
             'km_odometer_awal'     => 'required|integer|min:0',
             'foto_kondisi'         => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
@@ -84,12 +84,13 @@ class TransaksiSewaController extends Controller
 
         DB::transaction(function () use ($request, $booking) {
             $kodeTransaksi = 'TRX-' . strtoupper(Str::random(10));
+            $tanggalAktual = \Carbon\Carbon::createFromFormat('d-m-Y H:i', $request->tanggal_ambil_aktual)->format('Y-m-d H:i:s');
 
             $transaksi = TransaksiSewa::create([
                 'kode_transaksi'       => $kodeTransaksi,
                 'booking_id'           => $booking->id,
                 'kasir_id'             => Auth::id(), // Tercatat sebagai Admin yang mengeksekusi
-                'tanggal_ambil_aktual' => $request->tanggal_ambil_aktual,
+                'tanggal_ambil_aktual' => $tanggalAktual,
                 'total_biaya'          => $booking->estimasi_biaya,
                 'total_denda'          => 0,
                 'total_bayar'          => $booking->estimasi_biaya,
@@ -166,7 +167,7 @@ class TransaksiSewaController extends Controller
             'dendas'                 => 'nullable|array',
             'dendas.*.jenis_denda'   => 'required|string',
             'dendas.*.total_denda'   => 'required|numeric|min:0',
-            'dendas.*.jumlah_hari_telat' => 'nullable|integer|min:0',
+            'dendas.*.jumlah_jam_telat' => 'nullable|integer|min:0',
             'dendas.*.tarif_denda'   => 'nullable|numeric|min:0',
             'dendas.*.keterangan'    => 'nullable|string',
 
@@ -204,7 +205,7 @@ class TransaksiSewaController extends Controller
                             'transaksi_id'     => $transaksi->id,
                             'jenis_denda'      => $dendaItem['jenis_denda'],
                             'keterangan'       => $dendaItem['keterangan'] ?? null,
-                            'jumlah_hari_telat' => $dendaItem['jumlah_hari_telat'] ?? 0,
+                            'jumlah_jam_telat' => $dendaItem['jumlah_jam_telat'] ?? 0,
                             'tarif_denda'      => $dendaItem['tarif_denda'] ?? 0,
                             'total_denda'      => $itemTotal,
                         ]);
@@ -259,7 +260,7 @@ class TransaksiSewaController extends Controller
                 'status'                 => 'selesai',
             ]);
 
-            $transaksi->booking->kendaraan->update(['status' => 'tersedia']);
+            $transaksi->booking->kendaraan->update(['status' => 'aktif']);
             $transaksi->booking->update(['status' => 'selesai']);
         });
 
@@ -274,7 +275,7 @@ class TransaksiSewaController extends Controller
         DB::transaction(function () use ($transaksi) {
             // 1. Kembalikan status armada kendaraan menjadi tersedia kembali
             if ($transaksi->booking && $transaksi->booking->kendaraan) {
-                $transaksi->booking->kendaraan->update(['status' => 'tersedia']);
+                $transaksi->booking->kendaraan->update(['status' => 'aktif']);
             }
 
             // 2. Kembalikan status booking menjadi disetujui (agar bisa diproses ulang jika salah input)

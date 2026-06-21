@@ -14,6 +14,9 @@ class BookingController extends Controller
     {
         $query = Booking::with(['pelanggan.user', 'kendaraan', 'disetujuiOleh', 'dibuatOleh']);
 
+        // Hitung jumlah booking yang statusnya 'pending'
+        $pendingCount = Booking::where('status', 'pending')->count();
+
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
@@ -25,12 +28,12 @@ class BookingController extends Controller
 
         $booking = $query->latest()->paginate(15);
 
-        return view('admin.booking.index', compact('booking'));
+        return view('admin.booking.index', compact('booking', 'pendingCount'));
     }
 
     public function show(Booking $booking)
     {
-        $booking->load(['pelanggan.user', 'pelanggan.dokumen', 'kendaraan.kategori', 'disetujuiOleh', 'dibuatOleh', 'transaksiSewa']);
+        $booking->load(['pelanggan.user', 'pelanggan.dokumen', 'kendaraan.kategori', 'disetujuiOleh', 'dibuatOleh', 'transaksiSewa.deposit']);
 
         return view('admin.booking.show', compact('booking'));
     }
@@ -63,8 +66,8 @@ class BookingController extends Controller
             $userPelanggan = $booking->pelanggan->user;
 
             // Buat kalimat tambahan jika ada deposit
-            $teksDeposit = $request->pilih_deposit == 1 
-                ? " serta bersiap membayar jaminan deposit sebesar Rp " . number_format($request->nominal_deposit, 0, ',', '.') 
+            $teksDeposit = $request->pilih_deposit == 1
+                ? " serta bersiap membayar jaminan deposit sebesar Rp " . number_format($request->nominal_deposit, 0, ',', '.')
                 : "";
 
             // 4. Kirim Notifikasi Sukses ke Pelanggan
@@ -83,7 +86,6 @@ class BookingController extends Controller
 
             \Illuminate\Support\Facades\DB::commit();
             return back()->with('success', 'Booking berhasil disetujui dan notifikasi telah dikirim ke pelanggan.');
-
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\DB::rollBack();
             return back()->with('error', 'Gagal memproses persetujuan: ' . $e->getMessage());
@@ -129,7 +131,6 @@ class BookingController extends Controller
 
             \Illuminate\Support\Facades\DB::commit();
             return back()->with('success', 'Booking berhasil ditolak dan alasan telah diinfokan ke pelanggan.');
-
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\DB::rollBack();
             return back()->with('error', 'Gagal menolak booking: ' . $e->getMessage());

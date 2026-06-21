@@ -2,6 +2,7 @@
 @php
 $nav = [
     ['route' => 'admin.dashboard',              'icon' => 'layout-dashboard', 'label' => 'Dashboard'],
+    ['route' => 'admin.walkin.step1',           'icon' => 'user-plus',        'label' => 'Walk-In (Sewa Baru)'],
     ['route' => 'admin.users.index',            'icon' => 'users',            'label' => 'Manajemen User'],
     ['route' => 'admin.kendaraan.index',        'icon' => 'car',              'label' => 'Kendaraan'],
     ['route' => 'admin.kategori-kendaraan.index', 'icon' => 'tag',            'label' => 'Kategori Kendaraan'],

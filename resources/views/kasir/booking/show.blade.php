@@ -147,10 +147,18 @@
             </div>
         </div>
 
-        <div class="card p-6 bg-slate-50 border border-slate-100">
+        <div class="card p-6 bg-slate-50 border border-slate-100 space-y-2">
             <div class="flex justify-between text-sm">
                 <span class="text-slate-600">Total Sewa Pokok:</span>
                 <span class="font-bold text-slate-800">Rp {{ number_format($booking->estimasi_biaya, 0, ',', '.') }}</span>
+            </div>
+            <div class="flex justify-between text-xs text-amber-700 pt-1 border-t border-slate-200/50">
+                <span>Down Payment (DP 30%):</span>
+                <span class="font-bold">Rp {{ number_format($booking->estimasi_biaya * 0.3, 0, ',', '.') }}</span>
+            </div>
+            <div class="flex justify-between text-xs text-slate-600">
+                <span>Sisa Tagihan (70%):</span>
+                <span class="font-semibold">Rp {{ number_format($booking->estimasi_biaya * 0.7, 0, ',', '.') }}</span>
             </div>
         </div>
 

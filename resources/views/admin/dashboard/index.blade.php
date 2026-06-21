@@ -107,8 +107,8 @@
                         <span class="text-xs text-slate-400 font-mono">{{ $ba->kendaraan->plat_nomor }}</span>
                     </td>
                     <td class="px-5 py-3 text-slate-600">
-                        <span class="block font-semibold text-xs text-blue-600">{{ \Carbon\Carbon::parse($ba->tanggal_mulai)->format('d M Y') }}</span>
-                        <span class="text-xs text-slate-400">s/d {{ \Carbon\Carbon::parse($ba->tanggal_selesai)->format('d M Y') }}</span>
+                        <span class="block font-semibold text-xs text-blue-600">@indo_datetime($ba->tanggal_mulai)</span>
+                        <span class="text-xs text-slate-400">s/d @indo_datetime($ba->tanggal_selesai)</span>
                     </td>
                     <td class="px-5 py-3">
                         @if($ba->is_deposit)

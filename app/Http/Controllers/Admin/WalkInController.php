@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Kasir;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Booking;
@@ -21,7 +21,7 @@ class WalkInController extends Controller
      */
     public function step1()
     {
-        return view('kasir.walkin.step1');
+        return view('admin.walkin.step1');
     }
 
     /**
@@ -122,7 +122,7 @@ class WalkInController extends Controller
             ->orderBy('nama')
             ->get();
 
-        return view('kasir.walkin.step2', compact('pelanggan', 'kendaraan'));
+        return view('admin.walkin.step2', compact('pelanggan', 'kendaraan'));
     }
 
     /**
@@ -153,6 +153,9 @@ class WalkInController extends Controller
         $mulai   = Carbon::parse($request->tanggal_mulai);
         $selesai = Carbon::parse($request->tanggal_selesai);
         $durasi  = $mulai->diffInDays($selesai);
+        if ($durasi == 0) {
+            $durasi = 1; // Minimal sewa 1 hari
+        }
         $estimasi = $durasi * $kendaraan->tarif_harian;
 
         $booking = DB::transaction(function () use ($request, $pelanggan, $kendaraan, $durasi, $estimasi) {
@@ -165,13 +168,9 @@ class WalkInController extends Controller
                 'tanggal_selesai' => $request->tanggal_selesai,
                 'durasi_hari'     => $durasi,
                 'estimasi_biaya'  => $estimasi,
-                'catatan'         => $request->catatan ?? 'Walk-in oleh kasir',
-
-                // --- TAMBAHKAN DUA BARIS INI ---
+                'catatan'         => $request->catatan ?? 'Walk-in oleh admin',
                 'sumber_booking'  => 'walkin',
-                'dibuat_oleh'     => Auth::id(), // Mengambil ID kasir yang sedang login
-                // -------------------------------
-
+                'dibuat_oleh'     => Auth::id(),
                 'status'          => 'disetujui',
                 'disetujui_oleh'  => Auth::id(),
                 'disetujui_at'    => now(),
@@ -183,9 +182,9 @@ class WalkInController extends Controller
             return $booking;
         });
 
-        // Redirect langsung ke form serah terima yang sudah ada
+        // Redirect langsung ke form serah terima yang sudah ada di admin
         return redirect()
-            ->route('kasir.transaksi.serah-terima', $booking->id)
+            ->route('admin.transaksi.serah-terima', $booking->id)
             ->with('success', 'Booking walk-in berhasil dibuat (' . $booking->kode_booking . '). Silakan lanjutkan proses serah terima kendaraan.');
     }
 }

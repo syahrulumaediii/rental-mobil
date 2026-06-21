@@ -68,9 +68,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::patch('booking/{booking}/disetujui',  [App\Http\Controllers\Admin\BookingController::class, 'disetujui'])->name('booking.disetujui');
     Route::patch('booking/{booking}/ditolak',   [App\Http\Controllers\Admin\BookingController::class, 'ditolak'])->name('booking.ditolak');
 
-    // Admin/Owner bisa input transaksi langsung dari menu admin (URL Diselaraskan dengan kasir)
-    Route::get('booking/{booking}/serah-terima',   [App\Http\Controllers\Kasir\TransaksiSewaController::class, 'formSerahTerima'])->name('transaksi.serah-terima');
-    Route::post('booking/{booking}/serah-terima',  [App\Http\Controllers\Kasir\TransaksiSewaController::class, 'prosesSerahTerima'])->name('transaksi.proses-serah-terima');
+
+
+    // Walk-In Admin
+    Route::get('walk-in',               [App\Http\Controllers\Admin\WalkInController::class, 'step1'])->name('walkin.step1');
+    Route::post('walk-in/cari',         [App\Http\Controllers\Admin\WalkInController::class, 'cariPelanggan'])->name('walkin.cari');
+    Route::post('walk-in/step2',        [App\Http\Controllers\Admin\WalkInController::class, 'step2'])->name('walkin.step2');
+    Route::post('walk-in/store',        [App\Http\Controllers\Admin\WalkInController::class, 'store'])->name('walkin.store');
 
     // Manajemen Pelanggan, Dokumen & Blacklist
     Route::get('pelanggan',                             [App\Http\Controllers\Admin\PelangganController::class, 'index'])->name('pelanggan.index');

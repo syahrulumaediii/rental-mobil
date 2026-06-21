@@ -106,8 +106,8 @@
                     <label class="form-label mb-1.5 block text-xs font-bold text-slate-500 uppercase tracking-wide">Status</label>
                     <select name="status" class="form-input w-full text-sm" required>
                         {{-- 🌟 Status 'rusak' dipetakan masuk --}}
-                        @foreach(['aktif'=>'Aktif','non-aktif'=>'Non-Aktif','servis'=>'Service','rusak'=>'Rusak'] as $val=>$lbl)
-                        <option value="{{ $val }}" {{ old('status', $kendaraan->status ?? 'tersedia') === $val ? 'selected' : '' }}>{{ $lbl }}</option>
+                        @foreach(['aktif'=>'Aktif','non-aktif'=>'Non-Aktif','servis'=>'Service'] as $val=>$lbl)
+                        <option value="{{ $val }}" {{ old('status', $kendaraan->status ?? 'aktif') === $val ? 'selected' : '' }}>{{ $lbl }}</option>
                         @endforeach
                     </select>
                     @error('status')<p class="text-red-500 text-xs mt-1">{{ $message }}</p>@enderror

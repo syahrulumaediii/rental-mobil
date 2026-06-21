@@ -18,21 +18,20 @@
 {{-- Filter --}}
 <div class="card p-4 mb-5">
     <form method="GET" class="flex flex-col sm:flex-row flex-wrap gap-3 sm:items-end">
-        <div class="w-full sm:flex-1 sm:min-w-[200px]">
+        <div class="w-full sm:flex-1 sm:min-w-50">
             <label class="form-label mb-1.5 block text-xs font-semibold text-slate-500 uppercase">Cari</label>
             <input type="text" name="search" value="{{ request('search') }}" class="form-input w-full text-sm" placeholder="Nama, plat, merk...">
         </div>
-        <div class="w-full sm:w-auto sm:min-w-[160px]">
+        <div class="w-full sm:w-auto sm:min-w-40">
             <label class="form-label mb-1.5 block text-xs font-semibold text-slate-500 uppercase">Status</label>
             <select name="status" class="form-input w-full text-sm">
                 <option value="">Semua Status</option>
-                {{-- 🌟 Ditambahkan pilihan 'rusak' --}}
-                @foreach(['tersedia','disewa','perawatan','rusak'] as $s)
-                <option value="{{ $s }}" {{ request('status')===$s?'selected':'' }}>{{ ucfirst($s == 'perawatan' ? 'Perawatan' : $s) }}</option>
+                @foreach(['aktif'=>'Aktif','non-aktif'=>'Non-Aktif','servis'=>'Service','disewa'=>'Disewa'] as $val=>$lbl)
+                <option value="{{ $val }}" {{ request('status')===$val?'selected':'' }}>{{ $lbl }}</option>
                 @endforeach
             </select>
         </div>
-        <div class="w-full sm:w-auto sm:min-w-[180px]">
+        <div class="w-full sm:w-auto sm:min-w-45">
             <label class="form-label mb-1.5 block text-xs font-semibold text-slate-500 uppercase">Kategori</label>
             <select name="kategori_id" class="form-input w-full text-sm">
                 <option value="">Semua Kategori</option>
@@ -106,13 +105,14 @@
                         {{-- 🌟 Mapping warna diupdate dengan penambahan kelas badge-red untuk status 'rusak' --}}
                         @php 
                             $sc = [
-                                'tersedia'  => 'badge-green',
+                                'aktif'     => 'badge-green',
                                 'disewa'    => 'badge-blue',
-                                'perawatan' => 'badge-yellow',
-                                'rusak'     => 'badge-red'
+                                'servis'    => 'badge-yellow',
+                                'rusak'     => 'badge-red',
+                                'non-aktif' => 'badge-gray'
                             ]; 
                         @endphp
-                        <span class="badge {{ $sc[$k->status] ?? 'badge-gray' }} font-bold uppercase text-[10px] tracking-wide">{{ $k->status }}</span>
+                        <span class="badge {{ $sc[$k->status] ?? 'badge-gray' }} font-bold uppercase text-[10px] tracking-wide">{{ $k->status == 'aktif' ? 'Tersedia' : ($k->status == 'servis' ? 'Service' : $k->status) }}</span>
                     </td>
                     {{-- Panel Tombol Aksi --}}
                     <td class="py-3.5 px-5">
